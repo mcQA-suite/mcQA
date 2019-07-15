@@ -1,4 +1,4 @@
-🚧 **Under construction!**
+🚧 **Under construction.**
  
 # mcQA : Multiple Choice Questions Answering 
 
