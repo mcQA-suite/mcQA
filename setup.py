@@ -17,7 +17,6 @@ setuptools.setup(
     install_requires=read('requirements.txt').split(),
     classifiers=[
         "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: Apache License",
         "Operating System :: OS Independent",
     ],
 )
