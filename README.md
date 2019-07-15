@@ -1,4 +1,4 @@
-🚧 **Attention:** This repo is under construction. 
+🚧 **Under construction!**
  
 # mcQA
 Answering multiple choice questions with Language Models.
