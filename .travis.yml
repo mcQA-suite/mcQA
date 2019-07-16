@@ -6,7 +6,7 @@ install:
   - pip install --quiet .
 script:
     - pytest --cov=mcqa tests/
-    - pylint 
+    - pylint mcqa
 after_success:
   - codecov
   - pip install mcqa
