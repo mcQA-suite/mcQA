@@ -2,11 +2,11 @@ language: python
 python:
   - "3.6"
 install:
-  - pip install codecov pytest-cov pylint
+  - pip install codecov pytest-cov pylint-fail-under
   - pip install --quiet .
 script:
     - pytest --cov=mcqa tests/
-    - pylint mcqa
+    - pylint-fail-under --fail_under 8.0 mcqa
 after_success:
   - codecov
   - pip install mcqa
