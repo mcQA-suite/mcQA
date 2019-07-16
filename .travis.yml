@@ -5,4 +5,4 @@ install:
   - pip install codecov pytest-cov
   - pip install --quiet .
 script:
-    - print ('Hello mcQA')
+    - python -c "print ('Hello mcQA')"
