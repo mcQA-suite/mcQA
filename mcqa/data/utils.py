@@ -26,11 +26,12 @@ class MCQAExample(object):
 
 
 class InputFeatures(object):
+    """Input features for each example."""
+
     def __init__(self,
                  example_id,
                  choices_features,
                  label
-
                  ):
         self.example_id = example_id
         self.choices_features = [
@@ -45,12 +46,19 @@ class InputFeatures(object):
 
 
 def _truncate_seq_pair(tokens_a, tokens_b, max_length):
-    """Truncates a sequence pair in place to the maximum length."""
+    """Truncates a sequence pair in place to the maximum length.
 
-    # This is a simple heuristic which will always truncate the longer sequence
-    # one token at a time. This makes more sense than truncating an equal percent
-    # of tokens from each, since if one sequence is very short then each token
-    # that's truncated likely contains more information than a longer sequence.
+    This is a simple heuristic which will always truncate the longer sequence
+    one token at a time. This makes more sense than truncating an equal percent
+    of tokens from each, since if one sequence is very short then each token
+    that's truncated likely contains more information than a longer sequence.
+
+    Arguments:
+        tokens_a {[str]} -- First sequence
+        tokens_b {[str]} -- Second sequence
+        max_length {int} -- Maximum length of the sequence pair
+    """
+
     while True:
         total_length = len(tokens_a) + len(tokens_b)
         if total_length <= max_length:
@@ -62,6 +70,17 @@ def _truncate_seq_pair(tokens_a, tokens_b, max_length):
 
 
 def select_field(features, field):
+    """Select a field from the features
+
+    Arguments:
+        features {InputFeatures} -- List of features : Instances of InputFeatures 
+                                    with attribute choice_features being a list of dicts. 
+        field {str} -- Field to consider.
+
+    Returns:
+        [list] -- List of corresponding features for field.
+    """
+
     return [
         [
             choice[field]
