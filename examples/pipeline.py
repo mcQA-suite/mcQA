@@ -1,10 +1,10 @@
-from mcqa import MCData
+from mcqa import MCQAData
 from mcqa import Model
 
-# create data 
+# create data
 train_data_file = 'train.csv'
-train_dataloader = MCData().read(train_data_file)
+train_dataset = MCQAData().read(train_data_file)
 
-# training 
+# training
 model = Model()
-model.fit()
+model.fit(train_dataset)

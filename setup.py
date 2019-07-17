@@ -1,8 +1,10 @@
 import os
 import setuptools
 
+
 def read(file):
     return open(os.path.join(os.path.dirname(__file__), file)).read()
+
 
 setuptools.setup(
     name="mcqa",

@@ -1,0 +1,71 @@
+class MCQAExample(object):
+    """A single training/test example for the MCQA dataset."""
+
+    def __init__(self,
+                 mcqa_id,
+                 context_sentence,
+                 start_ending,
+                 ending_0,
+                 ending_1,
+                 ending_2,
+                 ending_3,
+                 label=None):
+        self.mcqa_id = mcqa_id
+        self.context_sentence = context_sentence
+        self.start_ending = start_ending
+        self.endings = [
+            ending_0,
+            ending_1,
+            ending_2,
+            ending_3,
+        ]
+        self.label = label
+
+    def __str__(self):
+        return self.__repr__()
+
+
+class InputFeatures(object):
+    def __init__(self,
+                 example_id,
+                 choices_features,
+                 label
+
+                 ):
+        self.example_id = example_id
+        self.choices_features = [
+            {
+                'input_ids': input_ids,
+                'input_mask': input_mask,
+                'segment_ids': segment_ids
+            }
+            for _, input_ids, input_mask, segment_ids in choices_features
+        ]
+        self.label = label
+
+
+def _truncate_seq_pair(tokens_a, tokens_b, max_length):
+    """Truncates a sequence pair in place to the maximum length."""
+
+    # This is a simple heuristic which will always truncate the longer sequence
+    # one token at a time. This makes more sense than truncating an equal percent
+    # of tokens from each, since if one sequence is very short then each token
+    # that's truncated likely contains more information than a longer sequence.
+    while True:
+        total_length = len(tokens_a) + len(tokens_b)
+        if total_length <= max_length:
+            break
+        if len(tokens_a) > len(tokens_b):
+            tokens_a.pop()
+        else:
+            tokens_b.pop()
+
+
+def select_field(features, field):
+    return [
+        [
+            choice[field]
+            for choice in feature.choices_features
+        ]
+        for feature in features
+    ]

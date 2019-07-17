@@ -1,9 +1,11 @@
 
 def test_fit():
-	pass
+    pass
+
 
 def test_predict():
-	pass
+    pass
+
 
 def test_predict_proba():
-	pass
+    pass
