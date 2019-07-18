@@ -1,6 +1,7 @@
 from mcqa.data import _truncate_seq_pair
 from mcqa.data import select_field
 from mcqa.data import InputFeatures
+from mcqa.data import read_mcqa_examples
 
 
 def test_truncate_seq_pair():
@@ -31,3 +32,15 @@ def test_select_field():
 
     assert len(res) == 1 and len(res[0]) == 1 and isinstance(res[0][0], list)
     assert len(res[0][0]) == 5
+
+
+def test_read_mcqa_examples(dummy_data_path):
+    examples = read_mcqa_examples(dummy_data_path,
+                                  is_training=False)
+    assert len(examples) == 1
+    assert examples[0].label == None
+
+    examples = read_mcqa_examples(dummy_data_path,
+                                  is_training=True)
+    assert len(examples) == 1
+    assert examples[0].label == 0

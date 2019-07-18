@@ -1,4 +1,7 @@
-class MCQAExample(object):
+import csv
+
+
+class MCQAExample():
     """A single training/test example for the MCQA dataset."""
 
     def __init__(self,
@@ -25,7 +28,7 @@ class MCQAExample(object):
         return self.__repr__()
 
 
-class InputFeatures(object):
+class InputFeatures():
     """Input features for each example."""
 
     def __init__(self,
@@ -73,8 +76,8 @@ def select_field(features, field):
     """Select a field from the features
 
     Arguments:
-        features {InputFeatures} -- List of features : Instances of InputFeatures 
-                                    with attribute choice_features being a list of dicts. 
+        features {InputFeatures} -- List of features : Instances of InputFeatures
+                                    with attribute choice_features being a list of dicts.
         field {str} -- Field to consider.
 
     Returns:
@@ -88,3 +91,43 @@ def select_field(features, field):
         ]
         for feature in features
     ]
+
+
+def read_mcqa_examples(input_file, is_training):
+    """Read an input file and return the corresponding MCQAExample instances.
+
+    Arguments:
+        input_file {str} -- File containing the data.
+        is_training {bool} -- Whether this is a training data
+                                (labels not None).
+
+    Returns:
+        [MCQAExample] -- Returns a list of instances of `MCQAExample`.
+    """
+
+    with open(input_file, 'r', encoding='utf-8') as f:
+        reader = csv.reader(f)
+        lines = []
+        for line in reader:
+            lines.append(line)
+
+    if is_training and lines[0][-1] != 'label':
+        raise ValueError(
+            "For training, the input file must contain a label column."
+        )
+
+    examples = [
+        MCQAExample(
+            mcqa_id=line[2],
+            context_sentence=line[4],
+            start_ending=line[5],  # the common beginning of each
+            # choice is stored in "sent2".
+            ending_0=line[7],
+            ending_1=line[8],
+            ending_2=line[9],
+            ending_3=line[10],
+            label=int(line[11]) if is_training else None
+        ) for line in lines[1:]  # we skip the line with the column names
+    ]
+
+    return examples
