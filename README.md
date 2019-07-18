@@ -7,7 +7,7 @@
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
 ![GitHub](https://img.shields.io/github/license/mcqa-suite/mcqa.svg)
 [![codecov](https://codecov.io/gh/mcqa-suite/mcQA/branch/master/graph/badge.svg)](https://codecov.io/gh/mcqa-suite/mcQA)
-[![Coverage Status](https://coveralls.io/repos/github/mcQA-suite/mcQA/badge.svg?branch=master)](https://coveralls.io/github/mcQA-suite/mcQA?branch=master)
+
 
 Answering multiple choice questions with Language Models.
 
