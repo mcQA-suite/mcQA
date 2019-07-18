@@ -1,0 +1,50 @@
+import pytest
+import csv
+
+from mcqa.data import MCQAData
+
+
+@pytest.fixture(scope="session")
+def dummy_data():
+    data = [
+        {
+            "id": 0,
+            "video-id": "anetv_jkn6uvmqwh4",
+            "fold-ind": 3416,
+            "startphrase": "Members of the procession walk down \
+                      the street holding small horn brass \
+                      instruments. A drum line",
+            "sent1": "Members of the procession walk down the \
+                     street holding small horn brass instruments.",
+            "sent2": "A drum line",
+            "gold-source": "gold",
+            "ending0": "passes by walking down the street playing their instruments.",
+            "ending1": "has heard approaching them.",
+            "ending2": "arrives and they're outside dancing and asleep.",
+            "ending3": "turns the lead singer watches the performance.",
+            "label": "0"
+        }
+    ]
+    yield data
+
+
+@pytest.fixture(scope="function")
+def dummy_data_path(dummy_data, tmpdir):
+    data = dummy_data
+    data_path = str(tmpdir.join("data.csv"))
+
+    f = csv.writer(open(data_path, "w"))
+    f.writerow(list(data[0].keys()))
+    for exp in data:
+        f.writerow(exp.values())
+
+    return data_path
+
+
+@pytest.fixture(scope="session")
+def mcqa_data():
+    bert_model = "bert-base-uncased"
+    lower_case = True
+    max_seq_length = 10
+
+    yield MCQAData(bert_model, lower_case, max_seq_length)
