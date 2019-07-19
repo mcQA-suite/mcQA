@@ -1,6 +1,6 @@
 import os
 import setuptools
-
+import mcqa
 
 def read(file):
     return open(os.path.join(os.path.dirname(__file__), file)).read()
@@ -8,7 +8,7 @@ def read(file):
 
 setuptools.setup(
     name="mcqa",
-    version="0.0.1",
+    version=mcqa.__version__,
     author="Taycir Yahmed",
     author_email="taycir.yahmed@gmail.com",
     description="Answering multiple choice questions with Language Models.",
