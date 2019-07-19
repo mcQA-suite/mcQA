@@ -1,2 +1,3 @@
 tqdm
+apex
 pytorch-transformers
