@@ -57,7 +57,7 @@ class Model():
         if n_gpu > 0:
             torch.cuda.manual_seed_all(seed)
 
-    def _prepare_model(self):
+    def _prepare_model(self, freeze):
         model = BertForMultipleChoice.from_pretrained(self.bert_model,
                                                       cache_dir=os.path.join(
                                                           str(PYTORCH_PRETRAINED_BERT_CACHE), 'distributed_{}'.format(self.local_rank)),
@@ -67,6 +67,10 @@ class Model():
             model.half()
 
         model.to(self.device)
+
+        if freeze:
+            for param in model.bert.parameters():
+                param.requires_grad = False
 
         if self.local_rank != -1:
             model = DDP(model)
@@ -117,7 +121,7 @@ class Model():
 
     def fit(self, train_dataset, train_batch_size, num_train_epochs,
             learning_rate, loss_scale=0, gradient_accumulation_steps=0,
-            warmup_proportion=0.1):
+            warmup_proportion=0.1, freeze=True):
         """Train the multi-choice question answering model 
         by updating the `self.model`. 
         """
@@ -128,7 +132,7 @@ class Model():
 
         train_batch_size = train_batch_size // gradient_accumulation_steps
 
-        model = self._prepare_model()
+        model = self._prepare_model(freeze)
 
         if self.local_rank == -1:
             train_sampler = RandomSampler(train_dataset)

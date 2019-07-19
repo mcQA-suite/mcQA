@@ -1,11 +1,11 @@
-
-def test_fit():
-    pass
-
-
-def test_predict():
-    pass
+from mcqa.models import Model
+from pytorch_transformers import BertForMultipleChoice
 
 
-def test_predict_proba():
-    pass
+def test_fit(mcqa_dataset):
+    mdl = Model(bert_model="bert-base-uncased",
+                device="cpu")
+
+    mdl.fit(mcqa_dataset)
+
+    assert isinstance(mdl.model, BertForMultipleChoice)
