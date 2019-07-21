@@ -112,9 +112,11 @@ class Model():
 
             warmup_linear = WarmupLinearSchedule(warmup_steps=warmup_proportion,
                                                  t_total=num_train_optimization_steps)
+
         else:
             optimizer = AdamW(optimizer_grouped_parameters,
                               lr=learning_rate,)
+            warmup_linear = None
 
         return optimizer, warmup_linear
 
