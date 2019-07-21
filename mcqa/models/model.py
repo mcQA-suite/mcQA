@@ -114,8 +114,7 @@ class Model():
                                                  t_total=num_train_optimization_steps)
         else:
             optimizer = AdamW(optimizer_grouped_parameters,
-                              lr=learning_rate,
-                              t_total=num_train_optimization_steps)
+                              lr=learning_rate,)
 
         return optimizer, warmup_linear
 
