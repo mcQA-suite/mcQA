@@ -120,7 +120,7 @@ class Model():
         return optimizer, warmup_linear
 
     def fit(self, train_dataset, train_batch_size, num_train_epochs,
-            learning_rate, loss_scale=0, gradient_accumulation_steps=0,
+            learning_rate=5e-5, loss_scale=0, gradient_accumulation_steps=0,
             warmup_proportion=0.1, freeze=True):
         """Train the multi-choice question answering model 
         by updating the `self.model`. 
