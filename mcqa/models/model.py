@@ -19,7 +19,7 @@ from pytorch_transformers.optimization import AdamW, WarmupLinearSchedule
 
 class Model():
     def __init__(self, device, bert_model, num_choices=4,
-                 local_rank=-1, fp16=True, seed=0):
+                 local_rank=-1, fp16=False, seed=0):
 
         self.bert_model = bert_model
         self.num_choices = num_choices
@@ -97,6 +97,7 @@ class Model():
             {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay)],
              'weight_decay': 0.0}
         ]
+        
         if self.fp16:
 
             optimizer = FusedAdam(optimizer_grouped_parameters,

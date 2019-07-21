@@ -6,6 +6,8 @@ def test_fit(mcqa_dataset):
     mdl = Model(bert_model="bert-base-uncased",
                 device="cpu")
 
+    print(mdl.fp16)
+
     mdl.fit(mcqa_dataset,
             train_batch_size=1,
             num_train_epochs=1)
