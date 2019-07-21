@@ -132,7 +132,7 @@ class Model():
 
         train_batch_size = train_batch_size // gradient_accumulation_steps
 
-        model = self._prepare_model(freeze)
+        self.model = self._prepare_model(freeze)
 
         if self.local_rank == -1:
             train_sampler = RandomSampler(train_dataset)
@@ -159,7 +159,7 @@ class Model():
 
         global_step = 0
 
-        model.train()
+        self.model.train()
 
         for _ in range(int(num_train_epochs), desc="Epoch"):
             tr_loss = 0
@@ -167,7 +167,7 @@ class Model():
             for step, batch in enumerate(tqdm(train_dataloader, desc="Iteration")):
                 batch = tuple(t.to(self.device) for t in batch)
                 input_ids, input_mask, segment_ids, label_ids = batch
-                loss = model(input_ids, segment_ids, input_mask, label_ids)
+                loss = self.model(input_ids, segment_ids, input_mask, label_ids)
                 if self.n_gpu > 1:
                     loss = loss.mean()  # mean() to average on multi-gpu.
                 if self.fp16 and loss_scale != 1.0:
@@ -197,9 +197,7 @@ class Model():
                     optimizer.zero_grad()
                     global_step += 1
 
-        self.model = model
-
-        return model
+        return self.model
 
     def save_model(self, path):
         model_to_save = self.model.module if hasattr(self.model,
