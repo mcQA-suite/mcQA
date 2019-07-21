@@ -97,7 +97,7 @@ class Model():
             {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay)],
              'weight_decay': 0.0}
         ]
-        
+
         if self.fp16:
 
             optimizer = FusedAdam(optimizer_grouped_parameters,
@@ -115,7 +115,7 @@ class Model():
         else:
             optimizer = AdamW(optimizer_grouped_parameters,
                               lr=learning_rate,
-                              warmup=warmup_proportion,
+                              warmup_steps=warmup_proportion,
                               t_total=num_train_optimization_steps)
 
         return optimizer, warmup_linear
