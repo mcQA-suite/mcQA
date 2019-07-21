@@ -109,7 +109,8 @@ class Model():
                 optimizer = FP16_Optimizer(
                     optimizer, static_loss_scale=loss_scale)
 
-            warmup_linear = WarmupLinearSchedule(t_total=num_train_optimization_steps)
+            warmup_linear = WarmupLinearSchedule(warmup_steps=warmup_proportion,
+                                                 t_total=num_train_optimization_steps)
         else:
             optimizer = AdamW(optimizer_grouped_parameters,
                               lr=learning_rate,
