@@ -1,5 +1,5 @@
 import os
-from tqdm import tqdm
+from tqdm import tqdm, trange
 import logging
 import random
 import numpy as np
@@ -162,13 +162,14 @@ class Model():
 
         self.model.train()
 
-        for _ in range(int(num_train_epochs), desc="Epoch"):
+        for _ in trange(int(num_train_epochs), desc="Epoch"):
             tr_loss = 0
             nb_tr_examples, nb_tr_steps = 0, 0
             for step, batch in enumerate(tqdm(train_dataloader, desc="Iteration")):
                 batch = tuple(t.to(self.device) for t in batch)
                 input_ids, input_mask, segment_ids, label_ids = batch
-                loss = self.model(input_ids, segment_ids, input_mask, label_ids)
+                loss = self.model(input_ids, segment_ids,
+                                  input_mask, label_ids)
                 if self.n_gpu > 1:
                     loss = loss.mean()  # mean() to average on multi-gpu.
                 if self.fp16 and loss_scale != 1.0:
