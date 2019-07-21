@@ -51,7 +51,7 @@ def mcqa_data():
 
 
 @pytest.fixture(scope="function")
-def mcqa_dataset(dummy_data_path):
+def mcqa_dataset(mcqa_data, dummy_data_path):
     dataset = mcqa_data.read(dummy_data_path,
                              is_training=True)
     yield dataset
