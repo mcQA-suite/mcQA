@@ -169,7 +169,7 @@ class Model():
                 batch = tuple(t.to(self.device) for t in batch)
                 input_ids, input_mask, segment_ids, label_ids = batch
                 loss = self.model(input_ids, segment_ids,
-                                  input_mask, label_ids)
+                                  input_mask, label_ids)[0]
                 if self.n_gpu > 1:
                     loss = loss.mean()  # mean() to average on multi-gpu.
                 if self.fp16 and loss_scale != 1.0:
