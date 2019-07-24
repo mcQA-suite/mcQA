@@ -1,5 +1,6 @@
 import pytest
 from mcqa.models import Model
+import numpy as np
 from pytorch_transformers import BertForMultipleChoice
 
 
@@ -14,7 +15,7 @@ def test_fit(mcqa_dataset):
     assert isinstance(mdl.model, BertForMultipleChoice)
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture()
 def trained_model(mcqa_dataset):
 
     mdl = Model(bert_model="bert-base-uncased",
@@ -30,3 +31,9 @@ def trained_model(mcqa_dataset):
 def test_predict(mcqa_dataset, trained_model):
     outputs = trained_model.predict(mcqa_dataset)
     assert len(outputs) == len(mcqa_dataset)
+
+def test_predict_proba(mcqa_dataset, trained_model):
+    outputs_proba = trained_model.predict_proba(mcqa_dataset)
+
+    assert len(outputs_proba) == len(mcqa_dataset)
+    assert (np.abs(outputs_proba.sum(axis=1) - 1) < 1e-5).all()
