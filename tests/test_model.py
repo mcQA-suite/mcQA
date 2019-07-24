@@ -29,11 +29,14 @@ def trained_model(mcqa_dataset):
 
 
 def test_predict(mcqa_dataset, trained_model):
-    outputs = trained_model.predict(mcqa_dataset)
+    outputs = trained_model.predict(mcqa_dataset,
+                                    eval_batch_size=1)
     assert len(outputs) == len(mcqa_dataset)
 
+
 def test_predict_proba(mcqa_dataset, trained_model):
-    outputs_proba = trained_model.predict_proba(mcqa_dataset)
+    outputs_proba = trained_model.predict_proba(mcqa_dataset,
+                                                eval_batch_size=1)
 
     assert len(outputs_proba) == len(mcqa_dataset)
     assert (np.abs(outputs_proba.sum(axis=1) - 1) < 1e-5).all()
