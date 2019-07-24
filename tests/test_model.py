@@ -40,3 +40,15 @@ def test_predict_proba(mcqa_dataset, trained_model):
 
     assert len(outputs_proba) == len(mcqa_dataset)
     assert (np.abs(outputs_proba.sum(axis=1) - 1) < 1e-5).all()
+
+
+def test_training_reproducibility(trained_model, mcqa_dataset):
+    mdl1 = trained_model
+    mdl2 = Model(bert_model="bert-base-uncased",
+                 device="cpu")
+    mdl2.fit(mcqa_dataset,
+             train_batch_size=1,
+             num_train_epochs=1)
+
+    for p1, p2 in zip(mdl1.model.parameters(), mdl2.model.parameters()):
+        assert p1.data.allclose(p2.data)
