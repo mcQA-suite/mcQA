@@ -125,6 +125,24 @@ class Model():
             warmup_proportion=0.1, freeze=True):
         """Train the multi-choice question answering model 
         by updating the `self.model`. 
+        
+        Arguments:
+            train_dataset {MCQADataset} -- [description]
+            train_batch_size {[type]} -- [description]
+            num_train_epochs {[type]} -- [description]
+        
+        Keyword Arguments:
+            learning_rate {[type]} -- [description] (default: {5e-5})
+            loss_scale {int} -- [description] (default: {0})
+            gradient_accumulation_steps {int} -- [description] (default: {1})
+            warmup_proportion {float} -- [description] (default: {0.1})
+            freeze {bool} -- [description] (default: {True})
+        
+        Raises:
+            ValueError: [description]
+        
+        Returns:
+            [type] -- [description]
         """
 
         if gradient_accumulation_steps < 1:
