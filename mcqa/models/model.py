@@ -240,7 +240,7 @@ class Model():
             label_ids = label_ids.to(self.device)
 
             with torch.no_grad():
-                logits = self.model(input_ids, segment_ids, input_mask)
+                logits = self.model(input_ids, segment_ids, input_mask)[0]
 
             logits = torch.nn.functional.softmax(logits, dim=1)
             logits = logits.detach().cpu().numpy()
