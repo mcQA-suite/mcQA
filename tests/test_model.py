@@ -52,8 +52,9 @@ def test_fit_optimization(mcqa_dataset):
                          num_train_epochs=1)
 
         losses.append(res['train_loss'])
-        
+
     assert losses[0] > losses[-1]
+
 
 def test_fit_reproducibility(trained_model, mcqa_dataset):
     mdl1 = trained_model
@@ -65,3 +66,23 @@ def test_fit_reproducibility(trained_model, mcqa_dataset):
 
     for p1, p2 in zip(mdl1.model.parameters(), mdl2.model.parameters()):
         assert p1.data.allclose(p2.data)
+
+
+def test_save_load(trained_model, mcqa_dataset, tmpdir):
+    model_path = str(tmpdir)
+    mdl_clone = Model(bert_model="bert-base-uncased",
+                      device="cpu")
+
+    mdl_clone.model = BertForMultipleChoice.from_pretrained(model_path,
+                                                            num_choices=4)
+
+    for p1, p2 in zip(mdl_clone.model.parameters(),
+                      trained_model.model.parameters()):
+
+        assert p1.data.allclose(p2.data)
+
+    mdl_clone.fit(mcqa_dataset,
+                  train_batch_size=1,
+                  num_train_epochs=1)
+
+    _ = mdl_clone.predict_proba(mcqa_dataset)
