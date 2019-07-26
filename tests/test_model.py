@@ -2,6 +2,8 @@ import pytest
 from mcqa.models import Model
 import numpy as np
 from pytorch_transformers import BertForMultipleChoice
+from mcqa.data import get_labels
+from sklearn.metrics import accuracy_score
 
 
 def test_fit(mcqa_dataset):
@@ -84,3 +86,14 @@ def test_unfitted_error(mcqa_dataset):
     with pytest.raises(Exception):
         mdl.predict_proba(mcqa_dataset,
                           eval_batch_size=1)
+
+
+def test_integration_sklearn_metrics(trained_model, mcqa_dataset):
+    outputs = trained_model.predict(mcqa_dataset,
+                                    eval_batch_size=1)
+    labels = get_labels(mcqa_dataset)
+
+    accuracy = accuracy_score(outputs, labels)
+
+    assert isinstance(accuracy, float)
+    assert 0 <= accuracy <= 1
