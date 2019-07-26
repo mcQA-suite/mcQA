@@ -85,4 +85,13 @@ def test_save_load(trained_model, mcqa_dataset, tmpdir):
                   train_batch_size=1,
                   num_train_epochs=1)
 
-    _ = mdl_clone.predict_proba(mcqa_dataset)
+    _ = mdl_clone.predict_proba(mcqa_dataset,
+                                eval_batch_size=1)
+
+
+def test_unfitted_error(mcqa_dataset):
+    mdl = Model(bert_model="bert-base-uncased",
+                device="cpu")
+    with pytest.raises(Exception):
+        mdl.predict_proba(mcqa_dataset,
+                          eval_batch_size=1)
