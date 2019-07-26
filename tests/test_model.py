@@ -43,15 +43,17 @@ def test_predict_proba(mcqa_dataset, trained_model):
 
 
 def test_fit_optimization(mcqa_dataset):
-    mdl = Model(bert_model="bert-base-uncased",
-                device="cpu")
-    losses = []
-    for i in range(10):
-        _, res = mdl.fit(mcqa_dataset,
-                         train_batch_size=1,
-                         num_train_epochs=i)
 
-        losses.append(res['train_loss'])
+    losses = []
+    for i in range(5):
+        mdl = Model(bert_model="bert-base-uncased",
+                    device="cpu")
+
+        loss = mdl.fit(mcqa_dataset,
+                       train_batch_size=1,
+                       num_train_epochs=i)[0]
+
+        losses.append(loss)
 
     assert losses[0] > losses[-1]
 
