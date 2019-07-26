@@ -18,6 +18,8 @@ from pytorch_transformers.optimization import AdamW, WarmupLinearSchedule
 
 
 class Model():
+    """Multiple choice question answering model."""
+
     def __init__(self, device, bert_model, num_choices=4,
                  local_rank=-1, fp16=False, seed=0):
 
@@ -58,6 +60,14 @@ class Model():
             torch.cuda.manual_seed_all(seed)
 
     def _prepare_model(self, freeze):
+        """Prepare a model to be trained
+
+        Arguments:
+            freeze {bool} -- Whether to freeze the BERT layers.
+
+        Returns:
+            [BertForMultipleChoice] -- BertForMultipleChoice model to train
+        """
         model = BertForMultipleChoice.from_pretrained(self.bert_model,
                                                       cache_dir=os.path.join(
                                                           str(PYTORCH_PRETRAINED_BERT_CACHE), 'distributed_{}'.format(self.local_rank)),
@@ -81,7 +91,22 @@ class Model():
 
     def _prepare_optimizer(self, learning_rate, loss_scale, warmup_proportion,
                            num_train_optimization_steps):
+        """Initialize the optimizer
 
+        Arguments:
+            learning_rate {float} -- The initial learning rate for Adam
+            loss_scale {float} -- Loss scaling to improve fp16 numeric 
+                                  stability. Only used when fp16 set to True.
+                                  0 (default value): dynamic loss scaling.
+                                  Positive power of 2: static loss scaling value.
+            warmup_proportion {float} -- Proportion of training to perform
+                                         linear learning rate warmup for
+                                         E.g., 0.1 = 10%% of training
+            num_train_optimization_steps {int} -- Number of optimization steps
+
+        Returns:
+            Optimizer -- The optimizer to use while training
+        """
         param_optimizer = list(self.model.named_parameters())
 
         # hack to remove pooler, which is not used
@@ -123,26 +148,31 @@ class Model():
     def fit(self, train_dataset, train_batch_size, num_train_epochs,
             learning_rate=5e-5, loss_scale=0, gradient_accumulation_steps=1,
             warmup_proportion=0.1, freeze=True):
-        """Train the multi-choice question answering model 
-        by updating the `self.model`. 
+        """Train the multiple choice QA model
 
         Arguments:
-            train_dataset {MCQADataset} -- [description]
-            train_batch_size {[type]} -- [description]
-            num_train_epochs {[type]} -- [description]
+            train_dataset {MCQADataset} -- The training dataset
+            train_batch_size {int} -- Total batch size for training.
+            num_train_epochs {[type]} -- Total number of training epochs
+                                         to perform
 
         Keyword Arguments:
-            learning_rate {[type]} -- [description] (default: {5e-5})
-            loss_scale {int} -- [description] (default: {0})
-            gradient_accumulation_steps {int} -- [description] (default: {1})
-            warmup_proportion {float} -- [description] (default: {0.1})
-            freeze {bool} -- [description] (default: {True})
+            learning_rate {float} -- The initial learning rate for Adam
+                                     (default: {5e-5})
+            loss_scale {int} -- Loss scaling to improve fp16 numeric stability
+                                (default: {0})
+            gradient_accumulation_steps {int} -- Number of updates steps to 
+                                                 accumulate before performing 
+                                                 a backward/update pass (default: {1})
+            warmup_proportion {float} -- Proportion of training to perform linear 
+                                         learning rate warmup for.  (default: {0.1})
+            freeze {bool} -- Whether to freeze BERT layers (default: {True})
 
         Raises:
-            ValueError: [description]
+            ValueError: Invalid gradient_accumulation_steps
 
         Returns:
-            [type] -- [description]
+            [BertForMultipleChoice] -- Trained Multiple Choice QA model
         """
 
         if gradient_accumulation_steps < 1:
@@ -220,6 +250,11 @@ class Model():
         return self.model
 
     def save_model(self, path):
+        """Save model to local
+
+        Arguments:
+            path {str} -- path to directory where to save the model
+        """
         model_to_save = self.model.module if hasattr(self.model,
                                                      'module') else self.model
 
@@ -234,8 +269,20 @@ class Model():
         model_to_save.config.to_json_file(output_config_file)
 
     def predict_proba(self, eval_dataset, eval_batch_size):
+        """Predict probabilities of classes 
+
+        Arguments:
+            eval_dataset {MCQADataset} -- The eval dataset
+            eval_batch_size {int} -- The evaluation batch size
+
+        Raises:
+            ValueError: Invalid local rank parameter
+
+        Returns:
+            [np.array] -- Numpy array with the probabilities
+        """
         if not (self.local_rank == -1 or torch.distributed.get_rank() == 0):
-            raise ValueError("Check local_rank !")
+            raise ValueError("Invalid local rank parameter.")
 
         logging.info("  Num examples = %d", len(eval_dataset))
         logging.info("  Batch size = %d", eval_batch_size)
@@ -267,6 +314,15 @@ class Model():
         return np.array(outputs_proba)
 
     def predict(self, eval_dataset, eval_batch_size):
+        """Genrate prediction of the eval dataset
+
+        Arguments:
+            eval_dataset {MCQADataset} -- The eval dataset
+            eval_batch_size {int} -- The evaluation batch size
+
+        Returns:
+            [np.array] -- The predictions
+        """
         outputs_proba = self.predict_proba(eval_dataset,
                                            eval_batch_size)
 
