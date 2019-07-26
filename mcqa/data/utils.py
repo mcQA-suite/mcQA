@@ -1,4 +1,5 @@
 import csv
+import numpy as np
 
 
 class MCQAExample():
@@ -131,3 +132,16 @@ def read_mcqa_examples(input_file, is_training):
     ]
 
     return examples
+
+
+def get_labels(dataset):
+    """Get labels from a dataset
+
+    Arguments:
+        dataset {MCQADataset} -- A dataset with valid labels
+
+    Returns:
+        [np.array] -- A numpy array of the labels
+    """
+    labels = [dataset[i][3] for i in range(len(dataset))]
+    return np.array(labels)

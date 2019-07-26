@@ -1,6 +1,7 @@
 from .mcqa_data import MCQAData
 from .utils import MCQAExample, InputFeatures, \
-    _truncate_seq_pair, select_field, read_mcqa_examples
+    _truncate_seq_pair, select_field, read_mcqa_examples, \
+    get_labels
 
 __all__ = [
     'MCQAData',
@@ -8,5 +9,6 @@ __all__ = [
     'InputFeatures',
     '_truncate_seq_pair',
     'select_field',
-    'read_mcqa_examples'
+    'read_mcqa_examples',
+    'get_labels'
 ]

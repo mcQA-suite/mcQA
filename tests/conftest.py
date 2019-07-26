@@ -48,3 +48,10 @@ def mcqa_data():
     max_seq_length = 10
 
     yield MCQAData(bert_model, lower_case, max_seq_length)
+
+
+@pytest.fixture(scope="function")
+def mcqa_dataset(mcqa_data, dummy_data_path):
+    dataset = mcqa_data.read(dummy_data_path,
+                             is_training=True)
+    yield dataset

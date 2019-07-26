@@ -2,6 +2,7 @@ import os
 import setuptools
 import mcqa
 
+
 def read(file):
     return open(os.path.join(os.path.dirname(__file__), file)).read()
 
