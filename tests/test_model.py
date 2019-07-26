@@ -42,22 +42,6 @@ def test_predict_proba(mcqa_dataset, trained_model):
     assert (np.abs(outputs_proba.sum(axis=1) - 1) < 1e-5).all()
 
 
-def test_fit_optimization(mcqa_dataset):
-
-    losses = []
-    for i in range(5):
-        mdl = Model(bert_model="bert-base-uncased",
-                    device="cpu")
-
-        loss = mdl.fit(mcqa_dataset,
-                       train_batch_size=1,
-                       num_train_epochs=i)[0]
-
-        losses.append(loss)
-
-    assert losses[0] > losses[-1]
-
-
 def test_fit_reproducibility(trained_model, mcqa_dataset):
     mdl1 = trained_model
     mdl2 = Model(bert_model="bert-base-uncased",
