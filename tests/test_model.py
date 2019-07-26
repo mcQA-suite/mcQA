@@ -46,10 +46,10 @@ def test_fit_optimization(mcqa_dataset):
     mdl = Model(bert_model="bert-base-uncased",
                 device="cpu")
     losses = []
-    for _ in range(10):
+    for i in range(10):
         _, res = mdl.fit(mcqa_dataset,
                          train_batch_size=1,
-                         num_train_epochs=1)
+                         num_train_epochs=i)
 
         losses.append(res['train_loss'])
 
@@ -70,6 +70,9 @@ def test_fit_reproducibility(trained_model, mcqa_dataset):
 
 def test_save_load(trained_model, mcqa_dataset, tmpdir):
     model_path = str(tmpdir)
+
+    trained_model.save_model(model_path)
+
     mdl_clone = Model(bert_model="bert-base-uncased",
                       device="cpu")
 
