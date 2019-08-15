@@ -10,7 +10,6 @@ def test_convert_examples_to_features(mcqa_data, dummy_data_path):
 
     assert len(features) == len(examples) == 1
     assert features[0].label == 0
-    assert features[0].example_id == "3416"
     assert len(features[0].choices_features) == 4
     assert list(features[0].choices_features[0].keys()) \
         == ['input_ids', 'input_mask', 'segment_ids']

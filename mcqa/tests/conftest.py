@@ -8,16 +8,9 @@ from mcqa.data import MCQAData
 def dummy_data():
     data = [
         {
-            "id": 0,
-            "video-id": "anetv_jkn6uvmqwh4",
-            "fold-ind": 3416,
             "startphrase": "Members of the procession walk down \
                       the street holding small horn brass \
                       instruments. A drum line",
-            "sent1": "Members of the procession walk down the \
-                     street holding small horn brass instruments.",
-            "sent2": "A drum line",
-            "gold-source": "gold",
             "ending0": "passes by walking down the street playing their instruments.",
             "ending1": "has heard approaching them.",
             "ending2": "arrives and they're outside dancing and asleep.",

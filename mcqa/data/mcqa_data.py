@@ -33,7 +33,7 @@ class MCQAData():
         outputs.
 
         Arguments:
-            examples {[MCQAExample]} -- list of `MCQAExample`s
+            examples [MCQAExample] -- list of `MCQAExample`s
 
         Returns:
             [InputFeatures] -- list of `InputFeatures`
@@ -42,15 +42,12 @@ class MCQAData():
         features = []
         for _, example in enumerate(examples):
             context_tokens = self.tokenizer.tokenize(example.context_sentence)
-            start_ending_tokens = self.tokenizer.tokenize(example.start_ending)
-
             choices_features = []
             for _, ending in enumerate(example.endings):
                 # We create a copy of the context tokens in order to be
                 # able to shrink it according to ending_tokens
                 context_tokens_choice = context_tokens[:]
-                ending_tokens = start_ending_tokens + \
-                    self.tokenizer.tokenize(ending)
+                ending_tokens = self.tokenizer.tokenize(ending)
                 # Modifies `context_tokens_choice` and `ending_tokens` in
                 # place so that the total length is less than the
                 # specified length.  Account for [CLS], [SEP], [SEP] with

@@ -8,21 +8,11 @@ class MCQAExample():
     def __init__(self,
                  mcqa_id,
                  context_sentence,
-                 start_ending,
-                 ending_0,
-                 ending_1,
-                 ending_2,
-                 ending_3,
+                 endings,
                  label=None):
         self.mcqa_id = mcqa_id
         self.context_sentence = context_sentence
-        self.start_ending = start_ending
-        self.endings = [
-            ending_0,
-            ending_1,
-            ending_2,
-            ending_3,
-        ]
+        self.endings = endings
         self.label = label
 
     def __str__(self):
@@ -116,19 +106,18 @@ def read_mcqa_examples(input_file, is_training):
         raise ValueError(
             "For training, the input file must contain a label column."
         )
+    elif is_training :
+        num_choices = len(lines[0]) - 2
+    else:
+        num_choices = len(lines[0]) - 1
 
     examples = [
         MCQAExample(
-            mcqa_id=line[2],
-            context_sentence=line[4],
-            start_ending=line[5],  # the common beginning of each
-            # choice is stored in "sent2".
-            ending_0=line[7],
-            ending_1=line[8],
-            ending_2=line[9],
-            ending_3=line[10],
-            label=int(line[11]) if is_training else None
-        ) for line in lines[1:]  # we skip the line with the column names
+            mcqa_id=id,
+            context_sentence=line[0],
+            endings=[line[i] for i in range(1, num_choices+1)],
+            label=int(line[num_choices+1]) if is_training else None
+        ) for id, line in enumerate(lines[1:])  # we skip the line with the column names
     ]
 
     return examples

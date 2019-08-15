@@ -30,6 +30,16 @@ pip install -e .
 
 ### Data preparation
 
+To train a `mcQA` model, you need to create a csv file with n+2 columns, n being the number of choices for each question. The first column should be the context sentence, the n following columns should be the choices for that question and the last column is the selected answer. 
+
+Below is an example of a 3 choice question (taken from the [CoS-E dataset](https://arxiv.org/pdf/1906.02361.pdf)) :
+
+| Context sentence  | Choice 1                | Choice 2            | Choice 3    | Label|
+| ----------------- | --------------------|--------------------|--------------------|-------------|
+| People do what during their time off from work?| take trips | brow shorter | become hysterical | take trips |
+
+If you have a trained `mcQA` model and want to infer on a dataset, it should have the same format as the train data, but the `label` column. 
+
 See example data preparation below:
 
 ```python
@@ -71,4 +81,8 @@ from mcqa.data import get_labels
 
 print(accuracy_score(preds, get_labels(train_dataset)))
 ```
+## References
 
+| Type                 | Title                                                                                                                                        | Author                                                                                 | Year |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- | ---- |
+|:newspaper: Paper| [Explain Yourself! Leveraging Language Models for Commonsense Reasoning](https://arxiv.org/pdf/1906.02361.pdf)|Nazneen Fatema Rajani, Bryan McCann, Caiming Xiong and Richard Socher| ACL 2019|
