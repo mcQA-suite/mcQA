@@ -9,7 +9,7 @@ jobs:
         steps:
             - checkout
             - run: sudo pip install --progress-bar off .
-            - run: git clone https://www.github.com/nvidia/apex && cd apex && sudo python setup.py install && cd ..
+            - run: sudo pip uninstall apex && git clone https://github.com/NVIDIA/apex.git && cd apex && sudo python setup.py install --cuda_ext --cpp_ext && cd ..
             - run: sudo pip install pytest codecov pytest-cov
             - run: sudo pip install tensorboardX scikit-learn
             - run: sudo pip install pytorch-transformers
