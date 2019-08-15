@@ -9,10 +9,10 @@ jobs:
         steps:
             - checkout
             - run: sudo pip install --progress-bar off .
+            - run: git clone https://www.github.com/nvidia/apex && cd apex && sudo python setup.py install && cd ..
             - run: sudo pip install pytest codecov pytest-cov
             - run: sudo pip install tensorboardX scikit-learn
             - run: sudo pip install pytorch-transformers
-            - run: git clone https://www.github.com/nvidia/apex && cd apex && sudo python setup.py install && cd ..
             - run: python -m pytest -sv ./mcqa/tests/ --cov
             - run: codecov
 workflows:
