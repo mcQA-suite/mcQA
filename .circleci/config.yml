@@ -3,16 +3,11 @@ jobs:
     build_py3:
         working_directory: ~/mcQA
         docker:
-            - image: circleci/python:3.5
+            - image: tayciryahmed/nlp
         resource_class: large
         parallelism: 4
         steps:
             - checkout
-            - run: sudo pip install --progress-bar off .
-            - run: sudo pip uninstall -y apex && git clone https://github.com/NVIDIA/apex.git && cd apex && sudo python setup.py install --cpp_ext --cuda_ext && cd ..
-            - run: sudo pip install pytest codecov pytest-cov
-            - run: sudo pip install tensorboardX scikit-learn
-            - run: sudo pip install pytorch-transformers==v1.0.0
             - run: python -m pytest -sv ./mcqa/tests/ --cov
             - run: codecov
 workflows:
