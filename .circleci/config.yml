@@ -12,7 +12,7 @@ jobs:
             - run: sudo pip uninstall -y apex && git clone https://github.com/NVIDIA/apex.git && cd apex && sudo python setup.py install --cpp_ext && cd ..
             - run: sudo pip install pytest codecov pytest-cov
             - run: sudo pip install tensorboardX scikit-learn
-            - run: sudo pip install pytorch-transformers
+            - run: sudo pip install pytorch-transformers==v1.0.0
             - run: python -m pytest -sv ./mcqa/tests/ --cov
             - run: codecov
 workflows:
