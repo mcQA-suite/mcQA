@@ -54,8 +54,7 @@ test_dataset = mcqa_data.read(data_file='swagaf/data/test.csv', is_training=Fals
 ```python
 from mcqa.models import Model
 
-mdl = Model(bert_model="bert-base-uncased",
-            device="cuda") 
+mdl = Model(bert_model="bert-base-uncased", device="cuda") 
             
 mdl.fit(train_dataset, train_batch_size=32, num_train_epochs=20)
 ```
