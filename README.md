@@ -43,9 +43,7 @@ See example data preparation below:
 ```python
 from mcqa.data import MCQAData
 
-mcqa_data = MCQAData(bert_model="bert-base-uncased", 
-                     lower_case=True, 
-                     max_seq_length=256) 
+mcqa_data = MCQAData(bert_model="bert-base-uncased", lower_case=True, max_seq_length=256) 
                      
 train_dataset = mcqa_data.read(data_file='swagaf/data/train.csv', is_training=True)
 test_dataset = mcqa_data.read(data_file='swagaf/data/test.csv', is_training=False)
@@ -59,16 +57,13 @@ from mcqa.models import Model
 mdl = Model(bert_model="bert-base-uncased",
             device="cuda") 
             
-mdl.fit(train_dataset, 
-        train_batch_size=32, 
-        num_train_epochs=20)
+mdl.fit(train_dataset, train_batch_size=32, num_train_epochs=20)
 ```
 
 ### Prediction
 
 ```python
-preds = mdl.predict(test_dataset, 
-                    eval_batch_size=32)
+preds = mdl.predict(test_dataset, eval_batch_size=32)
 ```
 
 ### Evaluation
