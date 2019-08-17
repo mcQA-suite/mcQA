@@ -68,7 +68,7 @@ def select_field(features, field):
 
     Arguments:
         features {InputFeatures} -- List of features : Instances of InputFeatures
-                                    with attribute choice_features being a list of dicts.
+        with attribute choice_features being a list of dicts.
         field {str} -- Field to consider.
 
     Returns:
@@ -90,10 +90,10 @@ def read_mcqa_examples(input_file, is_training):
     Arguments:
         input_file {str} -- File containing the data.
         is_training {bool} -- Whether this is a training data
-                                (labels not None).
+        (labels not None).
 
     Returns:
-        [MCQAExample] -- Returns a list of instances of `MCQAExample`.
+        [MCQAExample] -- Returns a list of instances of ``MCQAExample`` .
     """
 
     with open(input_file, 'r', encoding='utf-8') as f:

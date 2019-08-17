@@ -14,7 +14,7 @@ class MCQAData():
         self.max_seq_length = max_seq_length
 
     def convert_examples_to_features(self, examples):
-        """Convert a list of `MCQAExample`s to a list of `InputFeatures`s
+        """Convert a list of ``MCQAExample`` to a list of ``InputFeatures``
 
         MCQA is a multiple choice task. To perform this task using Bert,
         we will use the formatting proposed in "Improving Language
@@ -23,20 +23,22 @@ class MCQAData():
         https://github.com/google-research/bert/issues/38 :
         Each choice will correspond to a sample on which we run the
         inference. For a given MCQA example, we will create the 4
-        following inputs:
+        following inputs::
+
             - [CLS] context [SEP] choice_1 [SEP]
             - [CLS] context [SEP] choice_2 [SEP]
             - [CLS] context [SEP] choice_3 [SEP]
             - [CLS] context [SEP] choice_4 [SEP]
+
         The model will output a single value for each input. To get the
         final decision of the model, we will run a softmax over these 4
         outputs.
 
         Arguments:
-            examples [MCQAExample] -- list of `MCQAExample`s
+            examples [MCQAExample] -- list of ``MCQAExample``
 
         Returns:
-            [InputFeatures] -- list of `InputFeatures`
+            [InputFeatures] -- list of ``InputFeatures``
         """
 
         features = []
