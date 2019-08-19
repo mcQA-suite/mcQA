@@ -79,3 +79,15 @@ print(accuracy_score(preds, get_labels(train_dataset)))
 | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- | ---- |
 |:newspaper: Paper| [Explain Yourself! Leveraging Language Models for Commonsense Reasoning](https://arxiv.org/pdf/1906.02361.pdf)|Nazneen Fatema Rajani, Bryan McCann, Caiming Xiong and Richard Socher| ACL 2019|
 |:newspaper: Paper|[SWAG: A Large-Scale Adversarial Dataset for Grounded Commonsense Inference](https://arxiv.org/abs/1808.05326)|Rowan Zellers, Yonatan Bisk, Roy Schwartz and Yejin Choi|2018|
+|:newspaper: Paper|[RACE: Large-scale ReAding Comprehension Dataset From Examinations](https://arxiv.org/abs/1704.04683)|Guokun Lai, Qizhe Xie, Hanxiao Liu, Yiming Yang and Eduard Hovy|2017|
+| :computer: Framework | [Scikit-learn: Machine Learning in Python](http://jmlr.csail.mit.edu/papers/v12/pedregosa11a.html)                                           | Pedregosa et al.                                                                       | 2011 |
+| :computer: Framework | [PyTorch](https://arxiv.org/abs/1906.04980)                                                                                                  | Adam Paszke, Sam Gross, Soumith Chintala, Gregory Chanan                               | 2016 |
+| :computer: Framework | [PyTorch Pretrained BERT: The Big & Extending Repository of pretrained Transformers](https://github.com/huggingface/pytorch-pretrained-BERT) | Hugging Face                                                                           | 2018 |
+| :video_camera: Video | [Stanford CS224N: NLP with Deep Learning Lecture 10 – Question Answering](https://youtube.com/watch?v=yIdF-17HwSk)                           | Christopher Manning                                                                    | 2019 |
+
+## LICENSE
+[Apache-2.0](LICENSE)
+
+## Contributing
+Read our [Contributing Guidelines](.github/CONTRIBUTING.md).
+
