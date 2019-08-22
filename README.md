@@ -1,7 +1,5 @@
 # mcQA : Multiple Choice Questions Answering 
 
-Answering multiple choice questions with Language Models.
-
 [![CircleCI](https://circleci.com/gh/mcQA-suite/mcQA.svg?style=svg)](https://circleci.com/gh/mcQA-suite/mcQA)
 [![PyPI Version](https://img.shields.io/pypi/v/mcqa.svg)](https://pypi.org/project/mcqa/)
 ![GitHub](https://img.shields.io/github/license/mcqa-suite/mcqa.svg)
@@ -10,6 +8,8 @@ Answering multiple choice questions with Language Models.
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v1.4%20adopted-ff69b4.svg)](.github/CODE_OF_CONDUCT.md)
 [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/12SLtasLSeFdTTaXL_T31FvYfl73mEPmf)
 [![PyPI Downloads](https://img.shields.io/pypi/dm/cdqa.svg)](https://pypi.org/project/mcqa/)
+
+Answering multiple choice questions with Language Models.
 
 ## Installation
 
