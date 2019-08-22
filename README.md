@@ -6,7 +6,6 @@
 [![codecov](https://codecov.io/gh/mcqa-suite/mcQA/branch/master/graph/badge.svg)](https://codecov.io/gh/mcqa-suite/mcQA)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v1.4%20adopted-ff69b4.svg)](.github/CODE_OF_CONDUCT.md)
-[![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/12SLtasLSeFdTTaXL_T31FvYfl73mEPmf)
 [![PyPI Downloads](https://img.shields.io/pypi/dm/cdqa.svg)](https://pypi.org/project/mcqa/)
 
 Answering multiple choice questions with Language Models.
