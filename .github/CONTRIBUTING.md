@@ -36,5 +36,5 @@ See more about this workflow at https://guides.github.com/introduction/flow/
 
 ### Trouble setting up your environment ?
 
-You can use this [docker](https://hub.docker.com/r/tayciryahmed/nlp) image or use [Google Colab](https://colab.research.google.com/). Check out this [example](https://colab.research.google.com/drive/12SLtasLSeFdTTaXL_T31FvYfl73mEPmf) for starters.
+You can use this [docker](https://hub.docker.com/r/tayciryahmed/nlp) image or use [Google Colab](https://colab.research.google.com/). <br> Check out this [example](https://colab.research.google.com/drive/12SLtasLSeFdTTaXL_T31FvYfl73mEPmf) for starters.
 
