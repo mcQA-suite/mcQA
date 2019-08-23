@@ -1,13 +1,13 @@
 # mcQA : Multiple Choice Questions Answering 
 
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/26f497010c934b688c70bda4304c7100)](https://app.codacy.com/app/tayciryahmed/mcQA?utm_source=github.com&utm_medium=referral&utm_content=mcQA-suite/mcQA&utm_campaign=Badge_Grade_Dashboard)
 [![CircleCI](https://circleci.com/gh/mcQA-suite/mcQA.svg?style=svg)](https://circleci.com/gh/mcQA-suite/mcQA)
-[![PyPI Version](https://img.shields.io/pypi/v/mcqa.svg)](https://pypi.org/project/mcqa/)
-![GitHub](https://img.shields.io/github/license/mcqa-suite/mcqa.svg)
 [![codecov](https://codecov.io/gh/mcqa-suite/mcQA/branch/master/graph/badge.svg)](https://codecov.io/gh/mcqa-suite/mcQA)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/26f497010c934b688c70bda4304c7100)](https://app.codacy.com/app/tayciryahmed/mcQA?utm_source=github.com&utm_medium=referral&utm_content=mcQA-suite/mcQA&utm_campaign=Badge_Grade_Dashboard)
+[![PyPI Version](https://img.shields.io/pypi/v/mcqa.svg)](https://pypi.org/project/mcqa/)
+[![PyPI Downloads](https://img.shields.io/pypi/dm/cdqa.svg)](https://pypi.org/project/mcqa/)
+![GitHub](https://img.shields.io/github/license/mcqa-suite/mcqa.svg)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v1.4%20adopted-ff69b4.svg)](.github/CODE_OF_CONDUCT.md)
-[![PyPI Downloads](https://img.shields.io/pypi/dm/cdqa.svg)](https://pypi.org/project/mcqa/)
 
 Answering multiple choice questions with Language Models.
 
