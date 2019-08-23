@@ -1,5 +1,6 @@
 # mcQA : Multiple Choice Questions Answering 
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/26f497010c934b688c70bda4304c7100)](https://app.codacy.com/app/tayciryahmed/mcQA?utm_source=github.com&utm_medium=referral&utm_content=mcQA-suite/mcQA&utm_campaign=Badge_Grade_Dashboard)
 [![CircleCI](https://circleci.com/gh/mcQA-suite/mcQA.svg?style=svg)](https://circleci.com/gh/mcQA-suite/mcQA)
 [![PyPI Version](https://img.shields.io/pypi/v/mcqa.svg)](https://pypi.org/project/mcqa/)
 ![GitHub](https://img.shields.io/github/license/mcqa-suite/mcqa.svg)
