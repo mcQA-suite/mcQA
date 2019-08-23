@@ -95,7 +95,7 @@ class Model():
 
         Arguments:
             learning_rate {float} -- The initial learning rate for Adam
-            loss_scale {float} -- Loss scaling to improve fp16 numeric 
+            loss_scale {float} -- Loss scaling to improve fp16 numeric
                                   stability. Only used when fp16 set to True.
                                   0 (default value): dynamic loss scaling.
                                   Positive power of 2: static loss scaling value.
@@ -161,10 +161,10 @@ class Model():
                                      (default: {5e-5})
             loss_scale {int} -- Loss scaling to improve fp16 numeric stability
                                 (default: {0})
-            gradient_accumulation_steps {int} -- Number of updates steps to 
-                                                 accumulate before performing 
+            gradient_accumulation_steps {int} -- Number of updates steps to
+                                                 accumulate before performing
                                                  a backward/update pass (default: {1})
-            warmup_proportion {float} -- Proportion of training to perform linear 
+            warmup_proportion {float} -- Proportion of training to perform linear
                                          learning rate warmup for.  (default: {0.1})
             freeze {bool} -- Whether to freeze BERT layers (default: {True})
 
@@ -269,7 +269,7 @@ class Model():
         model_to_save.config.to_json_file(output_config_file)
 
     def predict_proba(self, eval_dataset, eval_batch_size):
-        """Predict probabilities of classes 
+        """Predict probabilities of classes
 
         Arguments:
             eval_dataset {MCQADataset} -- The eval dataset
