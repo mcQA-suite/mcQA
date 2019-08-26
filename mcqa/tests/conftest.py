@@ -1,6 +1,6 @@
-import pytest
 import csv
 
+import pytest
 from mcqa.data import MCQAData
 
 
@@ -11,7 +11,8 @@ def dummy_data():
             "startphrase": "Members of the procession walk down \
                       the street holding small horn brass \
                       instruments. A drum line",
-            "ending0": "passes by walking down the street playing their instruments.",
+            "ending0": "passes by walking down the street playing \
+                        their instruments.",
             "ending1": "has heard approaching them.",
             "ending2": "arrives and they're outside dancing and asleep.",
             "ending3": "turns the lead singer watches the performance.",

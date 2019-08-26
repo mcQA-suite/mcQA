@@ -1,5 +1,7 @@
 import os
+
 import setuptools
+
 import mcqa
 
 

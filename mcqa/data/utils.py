@@ -1,8 +1,9 @@
 import csv
+
 import numpy as np
 
 
-class MCQAExample():
+class MCQAExample:
     """A single training/test example for the MCQA dataset."""
 
     def __init__(self,
@@ -19,7 +20,7 @@ class MCQAExample():
         return self.__repr__()
 
 
-class InputFeatures():
+class InputFeatures:
     """Input features for each example."""
 
     def __init__(self,
@@ -67,8 +68,9 @@ def select_field(features, field):
     """Select a field from the features
 
     Arguments:
-        features {InputFeatures} -- List of features : Instances of InputFeatures
-        with attribute choice_features being a list of dicts.
+        features {InputFeatures} -- List of features : Instances
+        of InputFeatures with attribute choice_features being a list
+        of dicts.
         field {str} -- Field to consider.
 
     Returns:
@@ -106,18 +108,19 @@ def read_mcqa_examples(input_file, is_training):
         raise ValueError(
             "For training, the input file must contain a label column."
         )
-    elif is_training :
+    elif is_training:
         num_choices = len(lines[0]) - 2
     else:
         num_choices = len(lines[0]) - 1
 
     examples = [
         MCQAExample(
-            mcqa_id=id,
+            mcqa_id=_id,
             context_sentence=line[0],
-            endings=[line[i] for i in range(1, num_choices+1)],
-            label=int(line[num_choices+1]) if is_training else None
-        ) for id, line in enumerate(lines[1:])  # we skip the line with the column names
+            endings=[line[i] for i in range(1, num_choices + 1)],
+            label=int(line[num_choices + 1]) if is_training else None)
+        # we skip the line with the column names
+        for _id, line in enumerate(lines[1:])
     ]
 
     return examples

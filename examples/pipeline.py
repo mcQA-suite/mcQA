@@ -1,5 +1,4 @@
-from mcqa import MCQAData
-from mcqa import Model
+from mcqa import MCQAData, Model
 
 # create data
 train_data_file = 'train.csv'
