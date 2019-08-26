@@ -1,9 +1,10 @@
-import pytest
-from mcqa.models import Model
 import numpy as np
-from pytorch_transformers import BertForMultipleChoice
-from mcqa.data import get_labels
 from sklearn.metrics import accuracy_score
+
+import pytest
+from mcqa.data import get_labels
+from mcqa.models import Model
+from pytorch_transformers import BertForMultipleChoice
 
 
 def test_fit(mcqa_dataset):

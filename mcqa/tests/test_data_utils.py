@@ -1,9 +1,7 @@
-from mcqa.data import _truncate_seq_pair
-from mcqa.data import select_field
-from mcqa.data import InputFeatures
-from mcqa.data import read_mcqa_examples
-from mcqa.data import get_labels
 import numpy as np
+
+from mcqa.data import (InputFeatures, _truncate_seq_pair, get_labels,
+                       read_mcqa_examples, select_field)
 
 
 def test_truncate_seq_pair():
@@ -40,7 +38,7 @@ def test_read_mcqa_examples(dummy_data_path):
     examples = read_mcqa_examples(dummy_data_path,
                                   is_training=False)
     assert len(examples) == 1
-    assert examples[0].label == None
+    assert (examples[0].label is None)
 
     examples = read_mcqa_examples(dummy_data_path,
                                   is_training=True)

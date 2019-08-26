@@ -1,20 +1,19 @@
-import os
-from tqdm import tqdm, trange
 import logging
+import os
 import random
+
 import numpy as np
+from tqdm import tqdm, trange
+
 import torch
+from apex.optimizers import FP16_Optimizer, FusedAdam
+from apex.parallel import DistributedDataParallel as DDP
+from pytorch_transformers import (CONFIG_NAME, WEIGHTS_NAME,
+                                  BertForMultipleChoice)
+from pytorch_transformers.file_utils import PYTORCH_PRETRAINED_BERT_CACHE
+from pytorch_transformers.optimization import AdamW, WarmupLinearSchedule
 from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
 from torch.utils.data.distributed import DistributedSampler
-
-from apex.parallel import DistributedDataParallel as DDP
-from apex.optimizers import FP16_Optimizer
-from apex.optimizers import FusedAdam
-
-from pytorch_transformers import BertForMultipleChoice
-from pytorch_transformers.file_utils import PYTORCH_PRETRAINED_BERT_CACHE
-from pytorch_transformers import WEIGHTS_NAME, CONFIG_NAME
-from pytorch_transformers.optimization import AdamW, WarmupLinearSchedule
 
 
 class Model():
@@ -26,7 +25,12 @@ class Model():
         self.bert_model = bert_model
         self.num_choices = num_choices
 
-        if not torch.cuda.is_available() and (device == "cuda" or local_rank != -1):
+        _no_cuda_device = (
+            not torch.cuda.is_available()
+            and (device == "cuda" or local_rank != -1)
+            )
+
+        if _no_cuda_device:
             raise ValueError(
                 "No cuda device detected, can't set `device` to cuda.")
 
@@ -42,9 +46,9 @@ class Model():
             #  of sychronizing nodes/GPUs
             torch.distributed.init_process_group(backend='nccl')
 
-        logging.info("device: {} n_gpu: {}, distributed training: {}, \
-                     16-bits training: {}".format(device, n_gpu,
-                                                  bool(local_rank != -1), fp16))
+        logging.info("device: {} n_gpu: {}, distributed training: {}"
+                     " 16-bits training: {}"
+                     .format(device, n_gpu, bool(local_rank != -1), fp16))
 
         self.local_rank = local_rank
         self.device = device
@@ -68,10 +72,14 @@ class Model():
         Returns:
             [BertForMultipleChoice] -- BertForMultipleChoice model to train
         """
-        model = BertForMultipleChoice.from_pretrained(self.bert_model,
-                                                      cache_dir=os.path.join(
-                                                          str(PYTORCH_PRETRAINED_BERT_CACHE), 'distributed_{}'.format(self.local_rank)),
-                                                      num_choices=self.num_choices)
+        model = (BertForMultipleChoice
+                 .from_pretrained(
+                    self.bert_model,
+                    cache_dir=os.path.join(
+                        str(PYTORCH_PRETRAINED_BERT_CACHE),
+                        'distributed_{}'.format(self.local_rank)),
+                    num_choices=self.num_choices)
+                 )
 
         if self.fp16:
             model.half()
@@ -96,9 +104,9 @@ class Model():
         Arguments:
             learning_rate {float} -- The initial learning rate for Adam
             loss_scale {float} -- Loss scaling to improve fp16 numeric
-                                  stability. Only used when fp16 set to True.
-                                  0 (default value): dynamic loss scaling.
-                                  Positive power of 2: static loss scaling value.
+                stability. Only used when fp16 set to True.
+                0 (default value): dynamic loss scaling.
+                Positive power of 2: static loss scaling value.
             warmup_proportion {float} -- Proportion of training to perform
                                          linear learning rate warmup for
                                          E.g., 0.1 = 10%% of training
@@ -117,9 +125,11 @@ class Model():
         no_decay = ['bias', 'LayerNorm.bias', 'LayerNorm.weight']
 
         optimizer_grouped_parameters = [
-            {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_decay)],
+            {'params': [p for n, p in param_optimizer
+                        if not any(nd in n for nd in no_decay)],
              'weight_decay': 0.01},
-            {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay)],
+            {'params': [p for n, p in param_optimizer
+                        if any(nd in n for nd in no_decay)],
              'weight_decay': 0.0}
         ]
 
@@ -135,8 +145,9 @@ class Model():
                 optimizer = FP16_Optimizer(
                     optimizer, static_loss_scale=loss_scale)
 
-            warmup_linear = WarmupLinearSchedule(warmup_steps=warmup_proportion,
-                                                 t_total=num_train_optimization_steps)
+            warmup_linear = WarmupLinearSchedule(
+                warmup_steps=warmup_proportion,
+                t_total=num_train_optimization_steps)
 
         else:
             optimizer = AdamW(optimizer_grouped_parameters,
@@ -162,10 +173,10 @@ class Model():
             loss_scale {int} -- Loss scaling to improve fp16 numeric stability
                                 (default: {0})
             gradient_accumulation_steps {int} -- Number of updates steps to
-                                                 accumulate before performing
-                                                 a backward/update pass (default: {1})
-            warmup_proportion {float} -- Proportion of training to perform linear
-                                         learning rate warmup for.  (default: {0.1})
+                                accumulate before performing
+                                a backward/update pass (default: {1})
+            warmup_proportion {float} -- Proportion of training
+                to perform linear learning rate warmup for.  (default: {0.1})
             freeze {bool} -- Whether to freeze BERT layers (default: {True})
 
         Raises:
@@ -176,8 +187,10 @@ class Model():
         """
 
         if gradient_accumulation_steps < 1:
-            raise ValueError("Invalid gradient_accumulation_steps parameter: {}, \
-                              should be >= 1".format(gradient_accumulation_steps))
+            raise ValueError("Invalid gradient_accumulation_steps parameter: "
+                             "{} should be >= 1".format(
+                                gradient_accumulation_steps)
+                             )
 
         train_batch_size = train_batch_size // gradient_accumulation_steps
 
@@ -195,12 +208,14 @@ class Model():
         num_train_optimization_steps = len(
             train_dataloader) // gradient_accumulation_steps * num_train_epochs
         if self.local_rank != -1:
-            num_train_optimization_steps = num_train_optimization_steps // torch.distributed.get_world_size()
+            num_train_optimization_steps = (
+                num_train_optimization_steps //
+                torch.distributed.get_world_size()
+                )
 
-        optimizer, warmup_linear = self._prepare_optimizer(learning_rate,
-                                                           loss_scale,
-                                                           warmup_proportion,
-                                                           num_train_optimization_steps)
+        optimizer, warmup_linear = self._prepare_optimizer(
+            learning_rate, loss_scale, warmup_proportion,
+            num_train_optimization_steps)
 
         logging.info("  Num examples = %d", len(train_dataset))
         logging.info("  Batch size = %d", train_batch_size)
@@ -213,7 +228,8 @@ class Model():
         for _ in trange(int(num_train_epochs), desc="Epoch"):
             tr_loss = 0
             nb_tr_examples, nb_tr_steps = 0, 0
-            for step, batch in enumerate(tqdm(train_dataloader, desc="Iteration")):
+            for step, batch in enumerate(tqdm(train_dataloader,
+                                              desc="Iteration")):
                 batch = tuple(t.to(self.device) for t in batch)
                 input_ids, input_mask, segment_ids, label_ids = batch
                 loss = self.model(input_ids, segment_ids,
@@ -222,7 +238,8 @@ class Model():
                     loss = loss.mean()  # mean() to average on multi-gpu.
                 if self.fp16 and loss_scale != 1.0:
                     # rescale loss for fp16 training
-                    # see https://docs.nvidia.com/deeplearning/sdk/mixed-precision-training/index.html
+                    # see (https://docs.nvidia.com/deeplearning/sdk/
+                    #           mixed-precision-training/index.html)
                     loss = loss * loss_scale
                 if gradient_accumulation_steps > 1:
                     loss = loss / gradient_accumulation_steps
@@ -237,10 +254,12 @@ class Model():
                 if (step + 1) % gradient_accumulation_steps == 0:
                     if self.fp16:
                         # modify learning rate with special warm up BERT uses
-                        # if fp16 is False, BertAdam is used that handles this automatically
-                        lr_this_step = learning_rate * \
-                            warmup_linear.get_lr(
-                                global_step, warmup_proportion)
+                        # if fp16 is False, BertAdam is used that handles
+                        # this automatically
+                        lr_this_step = (learning_rate *
+                                        warmup_linear.get_lr(
+                                            global_step, warmup_proportion)
+                                        )
                         for param_group in optimizer.param_groups:
                             param_group['lr'] = lr_this_step
                     optimizer.step()
@@ -258,7 +277,8 @@ class Model():
         model_to_save = self.model.module if hasattr(self.model,
                                                      'module') else self.model
 
-        # If we save using the predefined names, we can load using `from_pretrained`
+        # If we save using the predefined names, we can load
+        # using `from_pretrained`
         if not os.path.exists(path) or os.path.isfile(path):
             os.makedirs(path)
 
@@ -296,13 +316,11 @@ class Model():
 
         outputs_proba = []
 
-        for input_ids, input_mask, segment_ids, label_ids in tqdm(eval_dataloader,
-                                                                  desc="Evaluating"):
+        for batch in tqdm(eval_dataloader, desc="Evaluating"):
 
-            input_ids = input_ids.to(self.device)
-            input_mask = input_mask.to(self.device)
-            segment_ids = segment_ids.to(self.device)
-            label_ids = label_ids.to(self.device)
+            input_ids = batch[0].to(self.device)
+            input_mask = batch[1].to(self.device)
+            segment_ids = batch[2].to(self.device)
 
             with torch.no_grad():
                 logits = self.model(input_ids, segment_ids, input_mask)[0]

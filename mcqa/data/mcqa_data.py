@@ -1,11 +1,12 @@
 import torch
-from torch.utils.data import TensorDataset
 from pytorch_transformers.tokenization_bert import BertTokenizer
-from.utils import InputFeatures, _truncate_seq_pair, select_field, \
-    read_mcqa_examples
+from torch.utils.data import TensorDataset
+
+from.utils import (InputFeatures, _truncate_seq_pair, select_field,
+                   read_mcqa_examples)
 
 
-class MCQAData():
+class MCQAData:
     """Read and prepare the input data. Returns a TensorDataSet."""
 
     def __init__(self, bert_model, lower_case, max_seq_length):
@@ -55,13 +56,15 @@ class MCQAData():
                 # specified length.  Account for [CLS], [SEP], [SEP] with
                 # "- 3"
                 _truncate_seq_pair(
-                    context_tokens_choice, ending_tokens, self.max_seq_length - 3)
+                    context_tokens_choice,
+                    ending_tokens,
+                    self.max_seq_length - 3)
 
-                tokens = ["[CLS]"] + context_tokens_choice + \
-                    ["[SEP]"] + ending_tokens + ["[SEP]"]
+                tokens = (["[CLS]"] + context_tokens_choice +
+                          ["[SEP]"] + ending_tokens + ["[SEP]"])
 
-                segment_ids = [
-                    0] * (len(context_tokens_choice) + 2) + [1] * (len(ending_tokens) + 1)
+                segment_ids = ([0] * (len(context_tokens_choice) + 2)
+                               + [1] * (len(ending_tokens) + 1))
 
                 input_ids = self.tokenizer.convert_tokens_to_ids(tokens)
                 input_mask = [1] * len(input_ids)
@@ -72,9 +75,11 @@ class MCQAData():
                 input_mask += padding
                 segment_ids += padding
 
-                assert len(input_ids) == self.max_seq_length
-                assert len(input_mask) == self.max_seq_length
-                assert len(segment_ids) == self.max_seq_length
+                _valid_inputs = all(len(x) == self.max_seq_length for x in
+                                    [input_ids, input_mask, segment_ids])
+                if not _valid_inputs:
+                    raise ValueError(
+                        "Inputs size doesn't match max sequence length")
 
                 choices_features.append(
                     (tokens, input_ids, input_mask, segment_ids))
