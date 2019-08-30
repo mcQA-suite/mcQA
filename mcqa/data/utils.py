@@ -98,8 +98,8 @@ def read_mcqa_examples(input_file, is_training):
         [MCQAExample] -- Returns a list of instances of ``MCQAExample`` .
     """
 
-    with open(input_file, 'r', encoding='utf-8') as f:
-        reader = csv.reader(f)
+    with open(input_file, 'r', encoding='utf-8') as in_file:
+        reader = csv.reader(in_file)
         lines = []
         for line in reader:
             lines.append(line)
@@ -108,7 +108,7 @@ def read_mcqa_examples(input_file, is_training):
         raise ValueError(
             "For training, the input file must contain a label column."
         )
-    elif is_training:
+    if is_training:
         num_choices = len(lines[0]) - 2
     else:
         num_choices = len(lines[0]) - 1
