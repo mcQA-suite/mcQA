@@ -1,3 +1,5 @@
+<a href="https://mcqa.readthedocs.io"><img src="https://avatars0.githubusercontent.com/u/52794440" width="125" height="125" align="right" /></a>
+
 # mcQA : Multiple Choice Questions Answering 
 
 [![CircleCI](https://circleci.com/gh/mcQA-suite/mcQA.svg?style=svg)](https://circleci.com/gh/mcQA-suite/mcQA)
