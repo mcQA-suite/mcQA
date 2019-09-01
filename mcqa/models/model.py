@@ -6,14 +6,16 @@ import numpy as np
 from tqdm import tqdm, trange
 
 import torch
-from apex.optimizers import FP16_Optimizer, FusedAdam
-from apex.parallel import DistributedDataParallel as DDP
+from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
+from torch.utils.data.distributed import DistributedSampler
+
 from pytorch_transformers import (CONFIG_NAME, WEIGHTS_NAME,
                                   BertForMultipleChoice)
 from pytorch_transformers.file_utils import PYTORCH_PRETRAINED_BERT_CACHE
 from pytorch_transformers.optimization import AdamW, WarmupLinearSchedule
-from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
-from torch.utils.data.distributed import DistributedSampler
+
+from apex.optimizers import FP16_Optimizer, FusedAdam
+from apex.parallel import DistributedDataParallel as DDP
 
 
 class Model():
@@ -74,11 +76,11 @@ class Model():
         """
         model = (BertForMultipleChoice
                  .from_pretrained(
-                    self.bert_model,
-                    cache_dir=os.path.join(
-                        str(PYTORCH_PRETRAINED_BERT_CACHE),
-                        'distributed_{}'.format(self.local_rank)),
-                    num_choices=self.num_choices)
+                     self.bert_model,
+                     cache_dir=os.path.join(
+                         str(PYTORCH_PRETRAINED_BERT_CACHE),
+                         'distributed_{}'.format(self.local_rank)),
+                     num_choices=self.num_choices)
                  )
 
         if self.fp16:
@@ -189,7 +191,7 @@ class Model():
         if gradient_accumulation_steps < 1:
             raise ValueError("Invalid gradient_accumulation_steps parameter: "
                              "{} should be >= 1".format(
-                                gradient_accumulation_steps)
+                                 gradient_accumulation_steps)
                              )
 
         train_batch_size = train_batch_size // gradient_accumulation_steps

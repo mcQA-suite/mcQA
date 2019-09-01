@@ -2,9 +2,10 @@ import numpy as np
 from sklearn.metrics import accuracy_score
 
 import pytest
+from pytorch_transformers import BertForMultipleChoice
 from mcqa.data import get_labels
 from mcqa.models import Model
-from pytorch_transformers import BertForMultipleChoice
+
 
 
 def test_fit(mcqa_dataset):
@@ -53,8 +54,8 @@ def test_fit_reproducibility(trained_model, mcqa_dataset):
              train_batch_size=1,
              num_train_epochs=1)
 
-    for p1, p2 in zip(mdl1.model.parameters(), mdl2.model.parameters()):
-        assert p1.data.allclose(p2.data)
+    for param1, param2 in zip(mdl1.model.parameters(), mdl2.model.parameters()):
+        assert param1.data.allclose(param2.data)
 
 
 def test_save_load(trained_model, mcqa_dataset, tmpdir):
@@ -68,10 +69,10 @@ def test_save_load(trained_model, mcqa_dataset, tmpdir):
     mdl_clone.model = BertForMultipleChoice.from_pretrained(model_path,
                                                             num_choices=4)
 
-    for p1, p2 in zip(mdl_clone.model.parameters(),
-                      trained_model.model.parameters()):
+    for param1, param2 in zip(mdl_clone.model.parameters(),
+                              trained_model.model.parameters()):
 
-        assert p1.data.allclose(p2.data)
+        assert param1.data.allclose(param2.data)
 
     mdl_clone.fit(mcqa_dataset,
                   train_batch_size=1,
@@ -91,7 +92,7 @@ def test_unfitted_error(mcqa_dataset):
 
 def test_integration_sklearn_metrics(trained_model, mcqa_dataset):
     outputs = trained_model.predict(mcqa_dataset,
-                                    eval_batch_size=1)
+                                  eval_batch_size=1)
     labels = get_labels(mcqa_dataset)
 
     accuracy = accuracy_score(outputs, labels)

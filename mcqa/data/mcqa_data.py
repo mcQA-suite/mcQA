@@ -1,7 +1,7 @@
 import torch
-from pytorch_transformers.tokenization_bert import BertTokenizer
 from torch.utils.data import TensorDataset
 
+from pytorch_transformers.tokenization_bert import BertTokenizer
 from.utils import (InputFeatures, _truncate_seq_pair, select_field,
                    read_mcqa_examples)
 

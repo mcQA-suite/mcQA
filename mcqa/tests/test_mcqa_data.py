@@ -1,6 +1,7 @@
 import torch
-from mcqa.data import read_mcqa_examples
 from torch.utils.data import TensorDataset
+
+from mcqa.data import read_mcqa_examples
 
 
 def test_convert_examples_to_features(mcqa_data, dummy_data_path):

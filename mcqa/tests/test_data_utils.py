@@ -38,7 +38,7 @@ def test_read_mcqa_examples(dummy_data_path):
     examples = read_mcqa_examples(dummy_data_path,
                                   is_training=False)
     assert len(examples) == 1
-    assert (examples[0].label is None)
+    assert examples[0].label is None
 
     examples = read_mcqa_examples(dummy_data_path,
                                   is_training=True)
