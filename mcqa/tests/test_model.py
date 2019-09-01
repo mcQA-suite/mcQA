@@ -32,22 +32,22 @@ def trained_model(mcqa_dataset):
     yield mdl
 
 
-def test_predict(mcqa_dataset, trained_mdl):
-    outputs = trained_mdl.predict(mcqa_dataset,
-                                  eval_batch_size=1)
+def test_predict(mcqa_dataset, trained_model):
+    outputs = trained_model.predict(mcqa_dataset,
+                                    eval_batch_size=1)
     assert len(outputs) == len(mcqa_dataset)
 
 
-def test_predict_proba(mcqa_dataset, trained_mdl):
-    outputs_proba = trained_mdl.predict_proba(mcqa_dataset,
-                                              eval_batch_size=1)
+def test_predict_proba(mcqa_dataset, trained_model):
+    outputs_proba = trained_model.predict_proba(mcqa_dataset,
+                                                eval_batch_size=1)
 
     assert len(outputs_proba) == len(mcqa_dataset)
     assert (np.abs(outputs_proba.sum(axis=1) - 1) < 1e-5).all()
 
 
-def test_fit_reproducibility(trained_mdl, mcqa_dataset):
-    mdl1 = trained_mdl
+def test_fit_reproducibility(trained_model, mcqa_dataset):
+    mdl1 = trained_model
     mdl2 = Model(bert_model="bert-base-uncased",
                  device="cpu")
     mdl2.fit(mcqa_dataset,
@@ -58,10 +58,10 @@ def test_fit_reproducibility(trained_mdl, mcqa_dataset):
         assert param1.data.allclose(param2.data)
 
 
-def test_save_load(trained_mdl, mcqa_dataset, tmpdir):
+def test_save_load(trained_model, mcqa_dataset, tmpdir):
     model_path = str(tmpdir)
 
-    trained_mdl.save_model(model_path)
+    trained_model.save_model(model_path)
 
     mdl_clone = Model(bert_model="bert-base-uncased",
                       device="cpu")
@@ -70,7 +70,7 @@ def test_save_load(trained_mdl, mcqa_dataset, tmpdir):
                                                             num_choices=4)
 
     for param1, param2 in zip(mdl_clone.model.parameters(),
-                              trained_mdl.model.parameters()):
+                              trained_model.model.parameters()):
 
         assert param1.data.allclose(param2.data)
 
@@ -90,8 +90,8 @@ def test_unfitted_error(mcqa_dataset):
                           eval_batch_size=1)
 
 
-def test_integration_sklearn_metrics(trained_mdl, mcqa_dataset):
-    outputs = trained_mdl.predict(mcqa_dataset,
+def test_integration_sklearn_metrics(trained_model, mcqa_dataset):
+    outputs = trained_model.predict(mcqa_dataset,
                                   eval_batch_size=1)
     labels = get_labels(mcqa_dataset)
 

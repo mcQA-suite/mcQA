@@ -23,8 +23,8 @@ def dummy_data():
 
 
 @pytest.fixture(scope="function")
-def dummy_data_path(dummydata, tmpdir):
-    data = dummydata
+def dummy_data_path(dummy_data, tmpdir):
+    data = dummy_data
     data_path = str(tmpdir.join("data.csv"))
 
     file = csv.writer(open(data_path, "w"))
@@ -45,7 +45,7 @@ def mcqa_data():
 
 
 @pytest.fixture(scope="function")
-def mcqa_dataset(mcqadata, dummy_data_pth):
-    dataset = mcqadata.read(dummy_data_pth,
+def mcqa_dataset(mcqa_data, dummy_data_pth):
+    dataset = mcqa_data.read(dummy_data_pth,
                             is_training=True)
     yield dataset
