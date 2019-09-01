@@ -14,13 +14,8 @@ from pytorch_transformers import (CONFIG_NAME, WEIGHTS_NAME,
 from pytorch_transformers.file_utils import PYTORCH_PRETRAINED_BERT_CACHE
 from pytorch_transformers.optimization import AdamW, WarmupLinearSchedule
 
-
-
 from apex.optimizers import FP16_Optimizer, FusedAdam
 from apex.parallel import DistributedDataParallel as DDP
-
-
-
 
 
 class Model():
