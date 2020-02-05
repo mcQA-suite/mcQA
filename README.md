@@ -9,6 +9,9 @@
 
 Answering multiple choice questions with Language Models.
 
+## News 
+This project is currently under development in order to migrate to `transformers=v2.4.1.`. Stay tuned. 
+
 ## Installation
 
 ### With pip
