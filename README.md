@@ -99,7 +99,7 @@ Read our [Contributing Guidelines](.github/CONTRIBUTING.md).
 
 ```
 @misc{Taycir2019,
-  author = {Taycir Yahmed },
+  author = {mcQA-suite},
   title = {mcQA},
   year = {2019},
   publisher = {GitHub},
