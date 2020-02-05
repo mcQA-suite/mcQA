@@ -4,7 +4,7 @@ jobs:
         working_directory: ~/mcQA
         docker:
             - image: tayciryahmed/nlp:v0.0.1
-        resource_class: large
+        resource_class: medium
         parallelism: 4
         steps:
             - checkout
