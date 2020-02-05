@@ -41,7 +41,8 @@ class InputFeatures(object):
     def __init__(self, example_id, choices_features, label):
         self.example_id = example_id
         self.choices_features = [
-            {"input_ids": input_ids, "input_mask": input_mask, "segment_ids": segment_ids}
+            {"input_ids": input_ids, "input_mask": input_mask,
+                "segment_ids": segment_ids}
             for input_ids, input_mask, segment_ids in choices_features
         ]
         self.label = label
@@ -126,8 +127,10 @@ class RaceProcessor(DataProcessor):
                     InputExample(
                         example_id=race_id,
                         question=question,
-                        contexts=[article, article, article, article],  # this is not efficient but convenient
-                        endings=[options[0], options[1], options[2], options[3]],
+                        # this is not efficient but convenient
+                        contexts=[article, article, article, article],
+                        endings=[options[0], options[1],
+                                 options[2], options[3]],
                         label=truth,
                     )
                 )
@@ -167,7 +170,8 @@ class SwagProcessor(DataProcessor):
     def _create_examples(self, lines: List[List[str]], type: str):
         """Creates examples for the training and dev sets."""
         if type == "train" and lines[0][-1] != "label":
-            raise ValueError("For training, the input file must contain a label column.")
+            raise ValueError(
+                "For training, the input file must contain a label column.")
 
         examples = [
             InputExample(
@@ -259,7 +263,8 @@ class ArcProcessor(DataProcessor):
                             options[2]["para"].replace("_", ""),
                             options[3]["para"].replace("_", ""),
                         ],
-                        endings=[options[0]["text"], options[1]["text"], options[2]["text"], options[3]["text"]],
+                        endings=[options[0]["text"], options[1]["text"],
+                                 options[2]["text"], options[3]["text"]],
                         label=truth,
                     )
                 )
@@ -305,7 +310,8 @@ def convert_examples_to_features(
             else:
                 text_b = example.question + " " + ending
 
-            inputs = tokenizer.encode_plus(text_a, text_b, add_special_tokens=True, max_length=max_length,)
+            inputs = tokenizer.encode_plus(
+                text_a, text_b, add_special_tokens=True, max_length=max_length,)
             if "num_truncated_tokens" in inputs and inputs["num_truncated_tokens"] > 0:
                 logger.info(
                     "Attention! you are cropping tokens (swag task is ok). "
@@ -317,23 +323,29 @@ def convert_examples_to_features(
 
             # The mask has 1 for real tokens and 0 for padding tokens. Only real
             # tokens are attended to.
-            attention_mask = [1 if mask_padding_with_zero else 0] * len(input_ids)
+            attention_mask = [
+                1 if mask_padding_with_zero else 0] * len(input_ids)
 
             # Zero-pad up to the sequence length.
             padding_length = max_length - len(input_ids)
             if pad_on_left:
                 input_ids = ([pad_token] * padding_length) + input_ids
-                attention_mask = ([0 if mask_padding_with_zero else 1] * padding_length) + attention_mask
-                token_type_ids = ([pad_token_segment_id] * padding_length) + token_type_ids
+                attention_mask = (
+                    [0 if mask_padding_with_zero else 1] * padding_length) + attention_mask
+                token_type_ids = ([pad_token_segment_id] *
+                                  padding_length) + token_type_ids
             else:
                 input_ids = input_ids + ([pad_token] * padding_length)
-                attention_mask = attention_mask + ([0 if mask_padding_with_zero else 1] * padding_length)
-                token_type_ids = token_type_ids + ([pad_token_segment_id] * padding_length)
+                attention_mask = attention_mask + \
+                    ([0 if mask_padding_with_zero else 1] * padding_length)
+                token_type_ids = token_type_ids + \
+                    ([pad_token_segment_id] * padding_length)
 
             assert len(input_ids) == max_length
             assert len(attention_mask) == max_length
             assert len(token_type_ids) == max_length
-            choices_features.append((input_ids, attention_mask, token_type_ids))
+            choices_features.append(
+                (input_ids, attention_mask, token_type_ids))
 
         label = label_map[example.label]
 
@@ -342,17 +354,22 @@ def convert_examples_to_features(
             logger.info("race_id: {}".format(example.example_id))
             for choice_idx, (input_ids, attention_mask, token_type_ids) in enumerate(choices_features):
                 logger.info("choice: {}".format(choice_idx))
-                logger.info("input_ids: {}".format(" ".join(map(str, input_ids))))
-                logger.info("attention_mask: {}".format(" ".join(map(str, attention_mask))))
-                logger.info("token_type_ids: {}".format(" ".join(map(str, token_type_ids))))
+                logger.info("input_ids: {}".format(
+                    " ".join(map(str, input_ids))))
+                logger.info("attention_mask: {}".format(
+                    " ".join(map(str, attention_mask))))
+                logger.info("token_type_ids: {}".format(
+                    " ".join(map(str, token_type_ids))))
                 logger.info("label: {}".format(label))
 
-        features.append(InputFeatures(example_id=example.example_id, choices_features=choices_features, label=label,))
+        features.append(InputFeatures(example_id=example.example_id,
+                                      choices_features=choices_features, label=label,))
 
     return features
 
 
-processors = {"race": RaceProcessor, "swag": SwagProcessor, "arc": ArcProcessor}
+processors = {"race": RaceProcessor,
+              "swag": SwagProcessor, "arc": ArcProcessor}
 
 
 MULTIPLE_CHOICE_TASKS_NUM_LABELS = {"race", 4, "swag", 4, "arc", 4}
