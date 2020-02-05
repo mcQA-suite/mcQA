@@ -95,3 +95,15 @@ print(accuracy_score(preds, get_labels(train_dataset)))
 ## Contributing
 Read our [Contributing Guidelines](.github/CONTRIBUTING.md).
 
+## Citation
+
+```
+@misc{Taycir2019,
+  author = {Taycir Yahmed },
+  title = {mcQA},
+  year = {2019},
+  publisher = {GitHub},
+  journal = {GitHub repository},
+  howpublished = {\url{https://github.com/mcQA-suite/mcQA/}}
+}
+```
