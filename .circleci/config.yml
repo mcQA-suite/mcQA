@@ -3,7 +3,7 @@ jobs:
     build_py3:
         working_directory: ~/mcQA
         docker:
-            - image: tayciryahmed/nlp:v0.0.1
+            - image: tayciryahmed/nlp:v0.0.2
         resource_class: medium
         parallelism: 4
         steps:

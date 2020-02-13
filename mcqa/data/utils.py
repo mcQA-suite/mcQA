@@ -1,6 +1,4 @@
 """ Multiple choice fine-tuning: utilities to work with multiple choice tasks of reading comprehension  """
-
-
 import csv
 import glob
 import json
@@ -16,7 +14,7 @@ from transformers import PreTrainedTokenizer
 logger = logging.getLogger(__name__)
 
 
-class InputExample(object):
+class InputExample:
     """A single training/test example for multiple choice"""
 
     def __init__(self, example_id, question, contexts, endings, label=None):
@@ -37,35 +35,36 @@ class InputExample(object):
         self.label = label
 
 
-class InputFeatures(object):
+class InputFeatures:
     def __init__(self, example_id, choices_features, label):
         self.example_id = example_id
         self.choices_features = [
-            {"input_ids": input_ids, "input_mask": input_mask,
-                "segment_ids": segment_ids}
+            {"input_ids": input_ids,
+             "input_mask": input_mask,
+             "segment_ids": segment_ids}
             for input_ids, input_mask, segment_ids in choices_features
         ]
         self.label = label
 
 
-class DataProcessor(object):
+class DataProcessor:
     """Base class for data converters for multiple choice data sets."""
 
     def get_train_examples(self, data_dir):
         """Gets a collection of `InputExample`s for the train set."""
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def get_dev_examples(self, data_dir):
         """Gets a collection of `InputExample`s for the dev set."""
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def get_test_examples(self, data_dir):
         """Gets a collection of `InputExample`s for the test set."""
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def get_labels(self):
         """Gets the list of labels for this data set."""
-        raise NotImplementedError()
+        raise NotImplementedError
 
 
 class RaceProcessor(DataProcessor):
@@ -73,7 +72,7 @@ class RaceProcessor(DataProcessor):
 
     def get_train_examples(self, data_dir):
         """See base class."""
-        logger.info("LOOKING AT {} train".format(data_dir))
+        logger.info(f"LOOKING AT {data_dir} train")
         high = os.path.join(data_dir, "train/high")
         middle = os.path.join(data_dir, "train/middle")
         high = self._read_txt(high)
@@ -82,7 +81,7 @@ class RaceProcessor(DataProcessor):
 
     def get_dev_examples(self, data_dir):
         """See base class."""
-        logger.info("LOOKING AT {} dev".format(data_dir))
+        logger.info(f"LOOKING AT {data_dir} dev")
         high = os.path.join(data_dir, "dev/high")
         middle = os.path.join(data_dir, "dev/middle")
         high = self._read_txt(high)
@@ -91,7 +90,7 @@ class RaceProcessor(DataProcessor):
 
     def get_test_examples(self, data_dir):
         """See base class."""
-        logger.info("LOOKING AT {} test".format(data_dir))
+        logger.info(f"LOOKING AT {data_dir} test")
         high = os.path.join(data_dir, "test/high")
         middle = os.path.join(data_dir, "test/middle")
         high = self._read_txt(high)
@@ -142,17 +141,17 @@ class SwagProcessor(DataProcessor):
 
     def get_train_examples(self, data_dir):
         """See base class."""
-        logger.info("LOOKING AT {} train".format(data_dir))
+        logger.info(f"LOOKING AT {data_dir} train")
         return self._create_examples(self._read_csv(os.path.join(data_dir, "train.csv")), "train")
 
     def get_dev_examples(self, data_dir):
         """See base class."""
-        logger.info("LOOKING AT {} dev".format(data_dir))
+        logger.info(f"LOOKING AT {data_dir} dev")
         return self._create_examples(self._read_csv(os.path.join(data_dir, "val.csv")), "dev")
 
     def get_test_examples(self, data_dir):
         """See base class."""
-        logger.info("LOOKING AT {} dev".format(data_dir))
+        logger.info(f"LOOKING AT {data_dir} dev")
         raise ValueError(
             "For swag testing, the input file does not contain a label column. It can not be tested in current code"
             "setting!"
@@ -194,16 +193,16 @@ class ArcProcessor(DataProcessor):
 
     def get_train_examples(self, data_dir):
         """See base class."""
-        logger.info("LOOKING AT {} train".format(data_dir))
+        logger.info(f"LOOKING AT {data_dir} train")
         return self._create_examples(self._read_json(os.path.join(data_dir, "train.jsonl")), "train")
 
     def get_dev_examples(self, data_dir):
         """See base class."""
-        logger.info("LOOKING AT {} dev".format(data_dir))
+        logger.info(f"LOOKING AT {data_dir} dev")
         return self._create_examples(self._read_json(os.path.join(data_dir, "dev.jsonl")), "dev")
 
     def get_test_examples(self, data_dir):
-        logger.info("LOOKING AT {} test".format(data_dir))
+        logger.info(f"LOOKING AT {data_dir} test")
         return self._create_examples(self._read_json(os.path.join(data_dir, "test.jsonl")), "test")
 
     def get_labels(self):
@@ -247,7 +246,8 @@ class ArcProcessor(DataProcessor):
                 continue
             four_choice += 1
             truth = str(normalize(data_raw["answerKey"]))
-            assert truth != "None"
+            if truth == "None":
+                raise ValueError(f"truth should be not None.")
             question_choices = data_raw["question"]
             question = question_choices["stem"]
             id = data_raw["id"]
@@ -270,8 +270,10 @@ class ArcProcessor(DataProcessor):
                 )
 
         if type == "train":
-            assert len(examples) > 1
-            assert examples[0].label is not None
+            if len(examples) <= 1:
+                raise ValueError("examples should be of length >1")
+            if examples[0].label is None:
+                raise ValueError("examples[0].label should be not None.")
         logger.info("len examples: %s}", str(len(examples)))
         logger.info("Three choices: %s", str(three_choice))
         logger.info("Five choices: %s", str(five_choice))
@@ -341,9 +343,14 @@ def convert_examples_to_features(
                 token_type_ids = token_type_ids + \
                     ([pad_token_segment_id] * padding_length)
 
-            assert len(input_ids) == max_length
-            assert len(attention_mask) == max_length
-            assert len(token_type_ids) == max_length
+            if len(input_ids) != max_length:
+                raise ValueError("input_ids should be of length = max_length")
+            if len(attention_mask) != max_length:
+                raise ValueError(
+                    "attention_mask should be of length = max_length")
+            if len(token_type_ids) != max_length:
+                raise ValueError(
+                    "token_type_ids should be of length = max_length")
             choices_features.append(
                 (input_ids, attention_mask, token_type_ids))
 
@@ -351,16 +358,13 @@ def convert_examples_to_features(
 
         if ex_index < 2:
             logger.info("*** Example ***")
-            logger.info("race_id: {}".format(example.example_id))
+            logger.info(f"race_id: {example.example_id}")
             for choice_idx, (input_ids, attention_mask, token_type_ids) in enumerate(choices_features):
-                logger.info("choice: {}".format(choice_idx))
-                logger.info("input_ids: {}".format(
-                    " ".join(map(str, input_ids))))
-                logger.info("attention_mask: {}".format(
-                    " ".join(map(str, attention_mask))))
-                logger.info("token_type_ids: {}".format(
-                    " ".join(map(str, token_type_ids))))
-                logger.info("label: {}".format(label))
+                logger.info(f"choice: {choice_idx}")
+                logger.info(f"input_ids: {" ".join(map(str, input_ids))}")
+                logger.info(f"attention_mask: {" ".join(map(str, attention_mask))}")
+                logger.info(f"token_type_ids: {" ".join(map(str, token_type_ids))}")
+                logger.info(f"label: {label}")
 
         features.append(InputFeatures(example_id=example.example_id,
                                       choices_features=choices_features, label=label,))
@@ -369,7 +373,8 @@ def convert_examples_to_features(
 
 
 processors = {"race": RaceProcessor,
-              "swag": SwagProcessor, "arc": ArcProcessor}
+              "swag": SwagProcessor,
+              "arc": ArcProcessor}
 
 
 MULTIPLE_CHOICE_TASKS_NUM_LABELS = {"race", 4, "swag", 4, "arc", 4}
