@@ -14,7 +14,7 @@ mcQA is an open source project and we love to receive contributions from our com
 
 ## Your First Contribution
 
-### Unsure where to begin contributing to cdQA?
+### Unsure where to begin contributing to mcQA?
 
 You can start by looking through these beginner and help-wanted issues:
 
