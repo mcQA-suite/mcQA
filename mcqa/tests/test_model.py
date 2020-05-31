@@ -2,10 +2,10 @@ import numpy as np
 from sklearn.metrics import accuracy_score
 
 import pytest
-from pytorch_transformers import BertForMultipleChoice
+from transformers import (BertForMultipleChoice,
+                          BertConfig)
 from mcqa.data import get_labels
 from mcqa.models import Model
-
 
 
 def test_fit(mcqa_dataset):
@@ -66,8 +66,15 @@ def test_save_load(trained_model, mcqa_dataset, tmpdir):
     mdl_clone = Model(bert_model="bert-base-uncased",
                       device="cpu")
 
-    mdl_clone.model = BertForMultipleChoice.from_pretrained(model_path,
-                                                            num_choices=4)
+    config = BertConfig.from_pretrained(
+        model_path,
+        num_labels=4
+    )
+
+    mdl_clone.model = BertForMultipleChoice.from_pretrained(
+        model_path,
+        config=config
+    )
 
     for param1, param2 in zip(mdl_clone.model.parameters(),
                               trained_model.model.parameters()):
@@ -92,7 +99,7 @@ def test_unfitted_error(mcqa_dataset):
 
 def test_integration_sklearn_metrics(trained_model, mcqa_dataset):
     outputs = trained_model.predict(mcqa_dataset,
-                                  eval_batch_size=1)
+                                    eval_batch_size=1)
     labels = get_labels(mcqa_dataset)
 
     accuracy = accuracy_score(outputs, labels)
