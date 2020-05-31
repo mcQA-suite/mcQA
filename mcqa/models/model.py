@@ -9,12 +9,12 @@ import torch
 from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
 from torch.utils.data.distributed import DistributedSampler
 
-from pytorch_transformers import (CONFIG_NAME, WEIGHTS_NAME,
-                                  BertForMultipleChoice)
-from pytorch_transformers.file_utils import PYTORCH_PRETRAINED_BERT_CACHE
-from pytorch_transformers.optimization import AdamW, WarmupLinearSchedule
+from transformers import (BertConfig, CONFIG_NAME, WEIGHTS_NAME,
+                          BertForMultipleChoice)
+from transformers.file_utils import PYTORCH_PRETRAINED_BERT_CACHE
+from transformers.optimization import AdamW, get_linear_schedule_with_warmup
 
-from apex.optimizers import FP16_Optimizer, FusedAdam
+from apex.contrib.optimizers import FP16_Optimizer, FusedAdam
 from apex.parallel import DistributedDataParallel as DDP
 
 
@@ -30,7 +30,7 @@ class Model():
         _no_cuda_device = (
             not torch.cuda.is_available()
             and (device == "cuda" or local_rank != -1)
-            )
+        )
 
         if _no_cuda_device:
             raise ValueError(
@@ -65,7 +65,7 @@ class Model():
         if n_gpu > 0:
             torch.cuda.manual_seed_all(seed)
 
-    def _prepare_model(self, freeze):
+    def _prepare_model(self, freeze, task_name='default'):
         """Prepare a model to be trained
 
         Arguments:
@@ -74,14 +74,23 @@ class Model():
         Returns:
             [BertForMultipleChoice] -- BertForMultipleChoice model to train
         """
-        model = (BertForMultipleChoice
-                 .from_pretrained(
-                     self.bert_model,
-                     cache_dir=os.path.join(
-                         str(PYTORCH_PRETRAINED_BERT_CACHE),
-                         'distributed_{}'.format(self.local_rank)),
-                     num_choices=self.num_choices)
-                 )
+        config = BertConfig.from_pretrained(
+            self.bert_model,
+            num_labels=self.num_choices,
+            finetuning_task=task_name,
+            cache_dir=os.path.join(
+                str(PYTORCH_PRETRAINED_BERT_CACHE),
+                'distributed_{}'.format(self.local_rank)),
+        )
+
+        model = BertForMultipleChoice.from_pretrained(
+            self.bert_model,
+            from_tf=bool(".ckpt" in self.bert_model),
+            config=config,
+            cache_dir=os.path.join(
+                str(PYTORCH_PRETRAINED_BERT_CACHE),
+                'distributed_{}'.format(self.local_rank)),
+        )
 
         if self.fp16:
             model.half()
@@ -147,9 +156,10 @@ class Model():
                 optimizer = FP16_Optimizer(
                     optimizer, static_loss_scale=loss_scale)
 
-            warmup_linear = WarmupLinearSchedule(
-                warmup_steps=warmup_proportion,
-                t_total=num_train_optimization_steps)
+            warmup_linear = get_linear_schedule_with_warmup(
+                optimizer,
+                num_warmup_steps=warmup_proportion,
+                num_training_steps=num_train_optimization_steps)
 
         else:
             optimizer = AdamW(optimizer_grouped_parameters,
@@ -213,7 +223,7 @@ class Model():
             num_train_optimization_steps = (
                 num_train_optimization_steps //
                 torch.distributed.get_world_size()
-                )
+            )
 
         optimizer, warmup_linear = self._prepare_optimizer(
             learning_rate, loss_scale, warmup_proportion,
@@ -239,12 +249,10 @@ class Model():
                 if self.n_gpu > 1:
                     loss = loss.mean()  # mean() to average on multi-gpu.
                 if self.fp16 and loss_scale != 1.0:
-                    # rescale loss for fp16 training
-                    # see (https://docs.nvidia.com/deeplearning/sdk/
-                    #           mixed-precision-training/index.html)
                     loss = loss * loss_scale
                 if gradient_accumulation_steps > 1:
                     loss = loss / gradient_accumulation_steps
+                loss = loss.mean()  # TODO
                 tr_loss += loss.item()
                 nb_tr_examples += input_ids.size(0)
                 nb_tr_steps += 1
