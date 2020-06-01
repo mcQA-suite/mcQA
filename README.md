@@ -10,7 +10,7 @@
 Answering multiple choice questions with Language Models.
 
 ## News 📢
-* This project is currently under development. Stay tuned !
+* 🚧 This project is **currently under development**. Stay tuned ! 🤩
 * Upgrade to `transformers==2.10.0`.
 
 ## Installation
