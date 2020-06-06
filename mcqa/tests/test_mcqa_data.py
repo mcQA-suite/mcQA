@@ -1,24 +1,10 @@
 import torch
-from torch.utils.data import TensorDataset
-
-from mcqa.data import read_mcqa_examples
-
-
-def test_convert_examples_to_features(mcqa_data, dummy_data_path):
-    examples = read_mcqa_examples(dummy_data_path,
-                                  is_training=True)
-    features = mcqa_data.convert_examples_to_features(examples)
-
-    assert len(features) == len(examples) == 1
-    assert features[0].label == 0
-    assert len(features[0].choices_features) == 4
-    assert list(features[0].choices_features[0].keys()) \
-        == ['input_ids', 'input_mask', 'segment_ids']
+from torch.utils.data.dataset import TensorDataset
+from mcqa.data import McqaDataset
 
 
-def test_read(mcqa_data, dummy_data_path):
-    dataset = mcqa_data.read(dummy_data_path, is_training=True)
-
+def test_McqaDataset(mcqa_dataset):
+    dataset = mcqa_dataset.get_dataset()
     assert isinstance(dataset, TensorDataset)
     assert len(dataset) == 1  # Nb of examples
     # 4 : all_input_ids, all_input_mask, all_segment_ids, all_label
@@ -28,6 +14,6 @@ def test_read(mcqa_data, dummy_data_path):
     assert len(dataset[0][2]) == 4  # Nb of encodings for all_segment_ids
     assert dataset[0][3] == torch.tensor(0)  # all_label
     # all_input_ids of encoding 0
-    assert len(dataset[0][0][0]) == mcqa_data.max_seq_length
+    assert len(dataset[0][0][0]) == 10
     # all_segment_ids of encoding 1
-    assert len(dataset[0][2][1]) == mcqa_data.max_seq_length
+    assert len(dataset[0][2][1]) == 10
