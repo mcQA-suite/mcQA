@@ -1,126 +1,108 @@
+import logging
+import os
+from typing import List
+from typing import Optional
+import numpy as np
 import torch
-from torch.utils.data import TensorDataset
+from filelock import FileLock
+from torch.utils.data.dataset import TensorDataset
+from transformers import PreTrainedTokenizer
+from .processors import ArcProcessor
+from .processors import RaceProcessor
+from .processors import SwagProcessor
+from .processors import SynonymProcessor
+from .utils import convert_examples_to_features
+from .utils import InputFeatures
+from .utils import Split, select_field
 
-from transformers.tokenization_bert import BertTokenizer
-from.utils import (InputFeatures, _truncate_seq_pair, select_field,
-                   read_mcqa_examples)
+PROCESSORS = {"race": RaceProcessor,
+              "swag": SwagProcessor,
+              "arc": ArcProcessor,
+              "syn": SynonymProcessor}
 
 
-class MCQAData:
-    """Read and prepare the input data. Returns a TensorDataSet."""
+LOGGER = logging.getLogger(__name__)
 
-    def __init__(self, bert_model, lower_case, max_seq_length):
-        self.tokenizer = BertTokenizer.from_pretrained(
-            bert_model, lower_case=lower_case)
-        self.max_seq_length = max_seq_length
 
-    def convert_examples_to_features(self, examples):
-        """Convert a list of ``MCQAExample`` to a list of ``InputFeatures``
+class McqaDataset(TensorDataset):
+    """Read and prepare the input data. Returns a Dataset."""
 
-        MCQA is a multiple choice task. To perform this task using Bert,
-        we will use the formatting proposed in "Improving Language
-        Understanding by Generative Pre-Training" and suggested by
-        @jacobdevlin-google in this issue
-        https://github.com/google-research/bert/issues/38 :
-        Each choice will correspond to a sample on which we run the
-        inference. For a given MCQA example, we will create the 4
-        following inputs::
+    features: List[InputFeatures]
 
-            - [CLS] context [SEP] choice_1 [SEP]
-            - [CLS] context [SEP] choice_2 [SEP]
-            - [CLS] context [SEP] choice_3 [SEP]
-            - [CLS] context [SEP] choice_4 [SEP]
+    def __init__(
+        self,
+        data_dir: str,
+        tokenizer: PreTrainedTokenizer,
+        task: str,
+        max_seq_length: Optional[int] = None,
+        overwrite_cache=False,
+        mode: Split = Split.train,
+    ):
+        processor = PROCESSORS[task]()
 
-        The model will output a single value for each input. To get the
-        final decision of the model, we will run a softmax over these 4
-        outputs.
+        cached_features_file = os.path.join(
+            data_dir,
+            "cached_{}_{}_{}_{}".format(
+                mode.value, tokenizer.__class__.__name__, str(max_seq_length), task,),
+        )
 
-        Arguments:
-            examples [MCQAExample] -- list of ``MCQAExample``
+        # Make sure only the first process in distributed training processes the dataset,
+        # and the others will use the cache.
+        lock_path = cached_features_file + ".lock"
+        with FileLock(lock_path):
 
-        Returns:
-            [InputFeatures] -- list of ``InputFeatures``
-        """
+            if os.path.exists(cached_features_file) and not overwrite_cache:
+                LOGGER.info(
+                    "Loading features from cached file %s", cached_features_file)
+                self.features = torch.load(cached_features_file)
+            else:
+                LOGGER.info(
+                    "Creating features from dataset file at %s", data_dir)
+                label_list = processor.get_labels()
+                if mode == Split.dev:
+                    examples = processor.get_dev_examples(data_dir)
+                elif mode == Split.test:
+                    examples = processor.get_test_examples(data_dir)
+                else:
+                    examples = processor.get_train_examples(data_dir)
+                LOGGER.info("Training examples: %s", len(examples))
+                # TODO clean up all this to leverage built-in features of tokenizers
+                self.features = convert_examples_to_features(
+                    examples,
+                    label_list,
+                    max_seq_length,
+                    tokenizer)
+                LOGGER.info("Saving features into cached file %s",
+                            cached_features_file)
+                torch.save(self.features, cached_features_file)
 
-        features = []
-        for _, example in enumerate(examples):
-            context_tokens = self.tokenizer.tokenize(example.context_sentence)
-            choices_features = []
-            for _, ending in enumerate(example.endings):
-                # We create a copy of the context tokens in order to be
-                # able to shrink it according to ending_tokens
-                context_tokens_choice = context_tokens[:]
-                ending_tokens = self.tokenizer.tokenize(ending)
-                # Modifies `context_tokens_choice` and `ending_tokens` in
-                # place so that the total length is less than the
-                # specified length.  Account for [CLS], [SEP], [SEP] with
-                # "- 3"
-                _truncate_seq_pair(
-                    context_tokens_choice,
-                    ending_tokens,
-                    self.max_seq_length - 3)
+    def __len__(self):
+        return len(self.features)
 
-                tokens = (["[CLS]"] + context_tokens_choice +
-                          ["[SEP]"] + ending_tokens + ["[SEP]"])
+    def __getitem__(self, i) -> InputFeatures:
+        return self.features[i]
 
-                segment_ids = ([0] * (len(context_tokens_choice) + 2)
-                               + [1] * (len(ending_tokens) + 1))
-
-                input_ids = self.tokenizer.convert_tokens_to_ids(tokens)
-                input_mask = [1] * len(input_ids)
-
-                # Zero-pad up to the sequence length.
-                padding = [0] * (self.max_seq_length - len(input_ids))
-                input_ids += padding
-                input_mask += padding
-                segment_ids += padding
-
-                _valid_inputs = all(len(x) == self.max_seq_length for x in
-                                    [input_ids, input_mask, segment_ids])
-                if not _valid_inputs:
-                    raise ValueError(
-                        "Inputs size doesn't match max sequence length")
-
-                choices_features.append(
-                    (tokens, input_ids, input_mask, segment_ids))
-
-            label = example.label
-
-            features.append(
-                InputFeatures(
-                    example_id=example.mcqa_id,
-                    choices_features=choices_features,
-                    label=label
-                )
-            )
-
-        return features
-
-    def read(self, data_file, is_training):
-        """Read and preprocess data
-
-        Arguments:
-            data_file {str} -- Path to the data : Should be in same
-                                                     format as SWAG dataset.
-
-        Returns:
-            dataset {TensorDataset}
-        """
-
-        examples = read_mcqa_examples(data_file, is_training=is_training)
-        features = self.convert_examples_to_features(examples)
-
-        all_input_ids = torch.tensor(select_field(features, 'input_ids'),
+    def get_dataset(self):
+        all_input_ids = torch.tensor(select_field(self.features, 'input_ids'),
                                      dtype=torch.long)
-        all_input_mask = torch.tensor(select_field(features, 'input_mask'),
+        all_input_mask = torch.tensor(select_field(self.features, 'attention_mask'),
                                       dtype=torch.long)
-        all_segment_ids = torch.tensor(select_field(features, 'segment_ids'),
+        all_segment_ids = torch.tensor(select_field(self.features, 'token_type_ids'),
                                        dtype=torch.long)
 
-        all_label = torch.tensor([f.label for f in features],
+        all_label = torch.tensor([f.label for f in self.features],
                                  dtype=torch.long)
 
-        data = TensorDataset(all_input_ids, all_input_mask, all_segment_ids,
-                             all_label)
+        self.data = TensorDataset(all_input_ids, all_input_mask, all_segment_ids,
+                                  all_label)
 
-        return data
+        return self.data
+
+    def get_labels(self):
+        """Get labels from a dataset
+
+        Returns:
+            [np.array] -- A numpy array of the labels
+        """
+        labels = [self.data[i][3] for i in range(len(self.data))]
+        return np.array(labels)

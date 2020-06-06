@@ -1,13 +1,19 @@
-from .mcqa_data import MCQAData
-from .utils import (MCQAExample, InputFeatures, _truncate_seq_pair,
-                    select_field, read_mcqa_examples, get_labels)
+from .mcqa_data import McqaDataset
+from .processors import (DataProcessor, RaceProcessor,
+                         SynonymProcessor, SwagProcessor, ArcProcessor)
+from .utils import (InputExample, InputFeatures, Split,
+                    convert_examples_to_features, select_field)
 
 __all__ = [
-    'MCQAData',
-    'MCQAExample',
+    'McqaDataset',
+    'InputExample',
     'InputFeatures',
-    '_truncate_seq_pair',
+    'convert_examples_to_features',
     'select_field',
-    'read_mcqa_examples',
-    'get_labels'
+    'Split',
+    'DataProcessor',
+    'RaceProcessor',
+    'SynonymProcessor',
+    'SwagProcessor',
+    'ArcProcessor'
 ]

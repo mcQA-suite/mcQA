@@ -1,139 +1,137 @@
-import csv
+import logging
+from dataclasses import dataclass
+from enum import Enum
+from typing import List
+from typing import Optional
+import tqdm
+from transformers import PreTrainedTokenizer
 
-import numpy as np
-
-
-class MCQAExample:
-    """A single training/test example for the MCQA dataset."""
-
-    def __init__(self,
-                 mcqa_id,
-                 context_sentence,
-                 endings,
-                 label=None):
-        self.mcqa_id = mcqa_id
-        self.context_sentence = context_sentence
-        self.endings = endings
-        self.label = label
-
-    def __str__(self):
-        return self.__repr__()
+LOGGER = logging.getLogger(__name__)
 
 
-class InputFeatures:
-    """Input features for each example."""
-
-    def __init__(self,
-                 example_id,
-                 choices_features,
-                 label
-                 ):
-        self.example_id = example_id
-        self.choices_features = [
-            {
-                'input_ids': input_ids,
-                'input_mask': input_mask,
-                'segment_ids': segment_ids
-            }
-            for _, input_ids, input_mask, segment_ids in choices_features
-        ]
-        self.label = label
+class Split(Enum):
+    train = "train"
+    dev = "dev"
+    test = "test"
 
 
-def _truncate_seq_pair(tokens_a, tokens_b, max_length):
-    """Truncates a sequence pair in place to the maximum length.
-
-    This is a simple heuristic which will always truncate the longer sequence
-    one token at a time. This makes more sense than truncating an equal percent
-    of tokens from each, since if one sequence is very short then each token
-    that's truncated likely contains more information than a longer sequence.
-
-    Arguments:
-        tokens_a {[str]} -- First sequence
-        tokens_b {[str]} -- Second sequence
-        max_length {int} -- Maximum length of the sequence pair
+@dataclass(frozen=True)
+class InputExample:
+    """
+    A single training/test example for multiple choice
+    Args:
+        example_id: Unique id for the example.
+        question: string. The untokenized text of the second sequence (question).
+        contexts: list of str. The untokenized text of the first sequence
+                  (context of corresponding question).
+        endings: list of str. multiple choice's options.
+                  Its length must be equal to contexts' length.
+        label: (Optional) string. The label of the example. This should be
+        specified for train and dev examples, but not for test examples.
     """
 
-    while True:
-        total_length = len(tokens_a) + len(tokens_b)
-        if total_length <= max_length:
-            break
-        if len(tokens_a) > len(tokens_b):
-            tokens_a.pop()
-        else:
-            tokens_b.pop()
+    example_id: str
+    question: str
+    contexts: List[str]
+    endings: List[str]
+    label: Optional[str]
+
+
+@dataclass(frozen=True)
+class InputFeatures:
+    """
+    A single set of features of data.
+    Property names are the same names as the corresponding inputs to a model.
+    """
+
+    example_id: str
+    input_ids: List[List[int]]
+    attention_mask: Optional[List[List[int]]]
+    token_type_ids: Optional[List[List[int]]]
+    label: Optional[int]
+
+
+def convert_examples_to_features(examples: List[InputExample],
+                                 label_list: List[str], max_length: int,
+                                 tokenizer: PreTrainedTokenizer) -> List[InputFeatures]:
+    """
+    Loads a data file into a list of `InputFeatures`
+    """
+
+    label_map = {label: i for i, label in enumerate(label_list)}
+
+    features = []
+    for (ex_index, example) in tqdm.tqdm(enumerate(examples), desc="convert examples to features"):
+        if ex_index % 10000 == 0:
+            LOGGER.info("Writing example %d of %d" % (ex_index, len(examples)))
+        choices_inputs = []
+        for _, (context, ending) in enumerate(zip(example.contexts,
+                                                  example.endings)):
+            text_a = context
+            if example.question.find("_") != -1:
+                # this is for cloze question
+                text_b = example.question.replace("_", ending)
+            else:
+                text_b = example.question + " " + ending
+
+            inputs = tokenizer.encode_plus(
+                text_a,
+                text_b,
+                add_special_tokens=True,
+                max_length=max_length,
+                pad_to_max_length=True,
+                return_overflowing_tokens=True,
+            )
+            if "num_truncated_tokens" in inputs and inputs["num_truncated_tokens"] > 0:
+                LOGGER.info(
+                    "Attention! you are cropping tokens (swag task is ok). "
+                    "If you are training ARC and RACE and you are poping question + options,"
+                    "you need to try to use a bigger max seq length!"
+                )
+
+            choices_inputs.append(inputs)
+
+        label = label_map[example.label]
+
+        input_ids = [x["input_ids"] for x in choices_inputs]
+        attention_mask = (
+            [x["attention_mask"]
+                for x in choices_inputs] if "attention_mask" in choices_inputs[0] else None
+        )
+        token_type_ids = (
+            [x["token_type_ids"]
+                for x in choices_inputs] if "token_type_ids" in choices_inputs[0] else None
+        )
+
+        features.append(
+            InputFeatures(
+                example_id=example.example_id,
+                input_ids=input_ids,
+                attention_mask=attention_mask,
+                token_type_ids=token_type_ids,
+                label=label,
+            )
+        )
+
+    for f in features[:2]:
+        LOGGER.info("*** Example ***")
+        LOGGER.info("feature: %s" % f)
+
+    return features
 
 
 def select_field(features, field):
     """Select a field from the features
-
     Arguments:
         features {InputFeatures} -- List of features : Instances
         of InputFeatures with attribute choice_features being a list
         of dicts.
         field {str} -- Field to consider.
-
     Returns:
         [list] -- List of corresponding features for field.
     """
 
     return [
-        [
-            choice[field]
-            for choice in feature.choices_features
-        ]
+        getattr(feature, field)
         for feature in features
     ]
-
-
-def read_mcqa_examples(input_file, is_training):
-    """Read an input file and return the corresponding MCQAExample instances.
-
-    Arguments:
-        input_file {str} -- File containing the data.
-        is_training {bool} -- Whether this is a training data
-        (labels not None).
-
-    Returns:
-        [MCQAExample] -- Returns a list of instances of ``MCQAExample`` .
-    """
-
-    with open(input_file, 'r', encoding='utf-8') as in_file:
-        reader = csv.reader(in_file)
-        lines = []
-        for line in reader:
-            lines.append(line)
-
-    if is_training and lines[0][-1] != 'label':
-        raise ValueError(
-            "For training, the input file must contain a label column."
-        )
-    if is_training:
-        num_choices = len(lines[0]) - 2
-    else:
-        num_choices = len(lines[0]) - 1
-
-    examples = [
-        MCQAExample(
-            mcqa_id=_id,
-            context_sentence=line[0],
-            endings=[line[i] for i in range(1, num_choices + 1)],
-            label=int(line[num_choices + 1]) if is_training else None)
-        # we skip the line with the column names
-        for _id, line in enumerate(lines[1:])
-    ]
-
-    return examples
-
-
-def get_labels(dataset):
-    """Get labels from a dataset
-
-    Arguments:
-        dataset {MCQADataset} -- A dataset with valid labels
-
-    Returns:
-        [np.array] -- A numpy array of the labels
-    """
-    labels = [dataset[i][3] for i in range(len(dataset))]
-    return np.array(labels)
