@@ -11,7 +11,7 @@ Answering multiple choice questions with Language Models.
 
 ## News 📢
 * 🚧 This project is **currently under development**. Stay tuned ! 🤩
-* Refactored data subpackage, the library now supports [RACE](https://www.aclweb.org/anthology/D17-1082/), Synonym, [Swag](https://www.semanticscholar.org/paper/SWAG%3A-A-Large-Scale-Adversarial-Dataset-for-Zellers-Bisk/af5c4b80fbf847f69a202ba5a780a3dd18c1a027), [ARC](https://allenai.org/data/arc) data sets.
+* Refactored data subpackage, the library now supports [RACE](https://www.aclweb.org/anthology/D17-1082/), Synonym, [Swag](https://www.semanticscholar.org/paper/SWAG%3A-A-Large-Scale-Adversarial-Dataset-for-Zellers-Bisk/af5c4b80fbf847f69a202ba5a780a3dd18c1a027) and [ARC](https://allenai.org/data/arc) data sets.
 * Upgrade to `transformers==2.10.0`.
 
 ## Installation
